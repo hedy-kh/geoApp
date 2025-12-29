@@ -8,10 +8,10 @@ import {
   Dimensions
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { LESSONS_DATA } from '../../../utils/lessonsData';
 const { width } = Dimensions.get('window');
 
-const CURRICULUM = [
+const CURRIiCULUM = [
   {
     id: 'unit-1',
     title: 'المغرب العربي: الموقع والمساحة',
@@ -33,6 +33,50 @@ const CURRICULUM = [
     lessonsCount: 4,
     icon: '🏛️'
   }
+];
+const CURRICULUM = [
+  {
+    id: "unit-1",
+    title: "المغرب العربي: الموقع والمساحة",
+    description: "استكشف جغرافية المغرب العربي",
+    lessonsCount: LESSONS_DATA["unit-1"].length,
+    icon: "🌍",
+  },
+  {
+    id: "unit-2",
+    title: "المناخ والطبيعة",
+    description: "تعرف على تنوع المناخ والتضاريس",
+    lessonsCount: LESSONS_DATA["unit-2"].length,
+    icon: "⛅",
+  },
+  {
+    id: "unit-3",
+    title: "التضاريس والجغرافيا",
+    description: "اكتشف تنوع التضاريس في المنطقة",
+    lessonsCount: LESSONS_DATA["unit-3"].length,
+    icon: "⛰️",
+  },
+  {
+    id: "unit-4",
+    title: "البيئة والتنوع الحيوي",
+    description: "استكشف الحياة النباتية والحيوانية",
+    lessonsCount: LESSONS_DATA["unit-4"].length,
+    icon: "🌳",
+  },
+  {
+    id: "unit-5",
+    title: "الثقافة والمجتمع",
+    description: "تعرف على السكان والعادات والتقاليد",
+    lessonsCount: LESSONS_DATA["unit-5"].length,
+    icon: "👥",
+  },
+  {
+    id: "unit-6",
+    title: "الاقتصاد والمستقبل",
+    description: "اكتشف الموارد الاقتصادية وآفاق التنمية",
+    lessonsCount: LESSONS_DATA["unit-6"].length,
+    icon: "💰",
+  },
 ];
 
 const UnitsScreen = ({ navigation }) => {

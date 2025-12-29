@@ -9,54 +9,16 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import { LESSONS_DATA } from '../../../utils/lessonsData';
 const { width } = Dimensions.get('window');
-
-const UNIT_LESSONS = {
-  'unit-1': [
-    {
-      id: 'lesson-1',
-      title: 'تعريف المغرب العربي',
-      description: 'التعريف بالمغرب العربي وموقعها الجغرافي',
-      duration: '10 دقائق',
-      isCompleted: true,
-    },
-    {
-      id: 'lesson-2',
-      title: 'حدود المغرب العربي',
-      description: 'الحدود البرية والبحرية لدول المغرب العربي',
-      duration: '15 دقائق',
-      isCompleted: false,
-    }
-  ],
-  'unit-2': [
-    {
-      id: 'lesson-3',
-      title: 'المناخ المتوسطي',
-      description: 'خصائص مناخ البحر المتوسط',
-      duration: '12 دقائق',
-      isCompleted: false,
-    }
-  ],
-  'unit-3': [
-    {
-      id: 'lesson-4',
-      title: 'التراث الثقافي',
-      description: 'المعالم التاريخية والتراثية',
-      duration: '18 دقائق',
-      isCompleted: false,
-    }
-  ]
-};
-
 const LessonsListScreen = ({ navigation, route }) => {
   const { unitId } = route.params;
   const [lessons, setLessons] = useState([]);
 
   useEffect(() => {
-    // In real app, fetch lessons for this unit
-    setLessons(UNIT_LESSONS[unitId] || []);
+    setLessons(LESSONS_DATA[unitId] || []);
   }, [unitId]);
+
 
   const handleLessonPress = (lesson) => {
     navigation.navigate('LessonDetail', { lesson });

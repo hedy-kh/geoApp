@@ -9,9 +9,6 @@ import SignupScreen from './src/screens/auth/SignupScreen';
 import ForgotPasswordScreen from './src/screens/auth/ForgotPasswordScreen';
 import LoginScreen from './src/screens/auth/LoginScreen';
 import AppNavigator from './src/navigation/AppNavigator';
-import ProfileScreen from './src/screens/ProfileScreen';
-import SettingsScreen from './src/screens/SettingsScreen';
-import LogoutScreen from './src/screens/LogoutScreen';
 const Stack = createStackNavigator();
 
 export default function App() {

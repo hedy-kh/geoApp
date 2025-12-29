@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -12,25 +12,31 @@ import {
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { VideoView } from "expo-video";
+import YoutubePlayer from "react-native-youtube-iframe";
 import useVideo from "../../../hooks/useVideo";
 
 const { width } = Dimensions.get("window");
 
+const getYouTubeVideoId = (url) => {
+  const regExp =
+    /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]{11}).*/;
+  const match = url.match(regExp);
+  return match ? match[2] : null;
+};
+
 const LessonDetailScreen = ({ navigation, route }) => {
   const { lesson } = route.params;
   const [completed, setCompleted] = useState(lesson.isCompleted);
-  const [showControls, setShowControls] = useState(false);
-  const controlsTimeoutRef = useRef(null);
 
-  // Use a direct video URL (YouTube URLs need special handling)
-  const directVideoUrl = "https://www.youtube.com/watch?v=eehXRw6Oqxw";
+  const isYoutube = lesson.video?.type === "youtube";
+  const videoUrl = lesson.video?.url;
 
-  const videoHook = useVideo(directVideoUrl, {
+  const youtubeVideoId = isYoutube ? getYouTubeVideoId(videoUrl) : null;
+
+  const videoHook = useVideo(!isYoutube ? videoUrl : null, {
     autoplay: false,
     loop: false,
     volume: 0.8,
-    allowsFullscreen: true,
-    allowsPictureInPicture: true,
   });
 
   const {
@@ -40,87 +46,9 @@ const LessonDetailScreen = ({ navigation, route }) => {
     isPlaying,
     currentTime,
     duration,
-    initializePlayer,
     togglePlay,
-    stop,
     toggleMute,
-    seekTo,
   } = videoHook;
-
-  useEffect(() => {
-    const initializeVideo = async () => {
-      try {
-        await initializePlayer();
-      } catch (err) {
-        console.error("Video initialization error:", err);
-      }
-    };
-
-    initializeVideo();
-
-    return () => {
-      if (videoHook && typeof videoHook.unload === "function") {
-        videoHook.unload();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    // Auto-hide controls after 3 seconds when playing
-    if (showControls && isPlaying) {
-      if (controlsTimeoutRef.current) {
-        clearTimeout(controlsTimeoutRef.current);
-      }
-
-      controlsTimeoutRef.current = setTimeout(() => {
-        setShowControls(false);
-      }, 3000);
-    }
-
-    return () => {
-      if (controlsTimeoutRef.current) {
-        clearTimeout(controlsTimeoutRef.current);
-      }
-    };
-  }, [showControls, isPlaying]);
-
-  const onQuizComplete = (score) => {
-    if (score >= 50 && !completed) {
-      setCompleted(true);
-    }
-    Alert.alert(
-      "نتيجة الاختبار",
-      `نهائك: ${score}/100\n${
-        score >= 50 ? "مبروك! أكملت الدرس 🎉" : "حاول مرة أخرى 💪"
-      }`,
-      [{ text: "حسناً" }]
-    );
-  };
-
-  const toggleVideoPlayback = () => {
-    if (player) {
-      togglePlay();
-      setShowControls(true);
-    }
-  };
-
-  const handleVideoPress = () => {
-    if (isLoading || error) return;
-
-    setShowControls(true);
-    if (!isPlaying) {
-      toggleVideoPlayback();
-    } else {
-      // Just show controls on tap when playing
-      if (controlsTimeoutRef.current) {
-        clearTimeout(controlsTimeoutRef.current);
-      }
-      controlsTimeoutRef.current = setTimeout(
-        () => setShowControls(false),
-        3000
-      );
-    }
-  };
 
   const formatTime = (seconds) => {
     if (!seconds || isNaN(seconds)) return "0:00";
@@ -129,57 +57,31 @@ const LessonDetailScreen = ({ navigation, route }) => {
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  const renderVideoSection = () => (
-    <View style={styles.videoContainer}>
-      {isLoading ? (
-        <View style={styles.videoPlaceholder}>
+  // ================= VIDEO RENDER =================
+  const renderVideoSection = () => {
+    if (isYoutube && youtubeVideoId) {
+      return (
+        <View style={styles.videoContainer}>
+          <YoutubePlayer height={220} play={false} videoId={youtubeVideoId} />
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.videoContainer}>
+        {isLoading ? (
           <ActivityIndicator size="large" color="#4F46E5" />
-          <Text style={styles.videoPlaceholderText}>جاري تحميل الفيديو...</Text>
-        </View>
-      ) : error ? (
-        <View style={styles.videoPlaceholder}>
-          <Icon name="alert-circle" size={48} color="#EF4444" />
+        ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={() => {
-              initializePlayer().catch((err) => {
-                console.error("Retry failed:", err);
-              });
-            }}
-          >
-            <Text style={styles.retryText}>إعادة المحاولة</Text>
-          </TouchableOpacity>
-        </View>
-      ) : player ? (
-        <>
-          <VideoView
-            style={styles.videoPlayer}
-            player={player}
-            allowsFullscreen
-            allowsPictureInPicture
-          />
-
-          {/* Video Overlay Controls */}
-          <TouchableOpacity
-            style={styles.videoOverlay}
-            onPress={handleVideoPress}
-            activeOpacity={0.8}
-          >
-            {!isPlaying && !isLoading && !error && (
-              <View style={styles.playButtonOverlay}>
-                <Icon name="play-circle" size={60} color="#FFFFFF" />
-              </View>
-            )}
-          </TouchableOpacity>
-
-          {/* Video Controls Bar */}
-          {showControls && !isLoading && !error && (
+        ) : player ? (
+          <>
+            <VideoView
+              style={styles.videoPlayer}
+              player={player}
+              nativeControls={false}
+            />
             <View style={styles.controlsBar}>
-              <TouchableOpacity
-                onPress={toggleVideoPlayback}
-                disabled={isLoading || !!error}
-              >
+              <TouchableOpacity onPress={togglePlay}>
                 <Icon
                   name={isPlaying ? "pause" : "play"}
                   size={24}
@@ -191,10 +93,7 @@ const LessonDetailScreen = ({ navigation, route }) => {
                 {formatTime(currentTime)} / {formatTime(duration)}
               </Text>
 
-              <TouchableOpacity
-                onPress={toggleMute}
-                disabled={isLoading || !!error}
-              >
+              <TouchableOpacity onPress={toggleMute}>
                 <Icon
                   name={player?.muted ? "volume-mute" : "volume-high"}
                   size={24}
@@ -202,58 +101,22 @@ const LessonDetailScreen = ({ navigation, route }) => {
                 />
               </TouchableOpacity>
             </View>
-          )}
-        </>
-      ) : (
-        <View style={styles.videoPlaceholder}>
-          <Icon name="video-off" size={48} color="#6B7280" />
-          <Text style={styles.videoPlaceholderText}>الفيديو غير متوفر</Text>
-        </View>
-      )}
-    </View>
-  );
-
-  const renderQuizSection = () => (
-    <View style={styles.quizSection}>
-      <Text style={styles.sectionTitle}>🎯 اختبر معرفتك</Text>
-      <Text style={styles.quizSubtitle}>اختر مستوى الصعوبة:</Text>
-
-      <View style={styles.difficultyOptions}>
-        {[
-          { id: "EASY", label: "سهل", icon: "🦁", color: "#10B981" },
-          { id: "MEDIUM", label: "متوسط", icon: "🧭", color: "#F59E0B" },
-          { id: "HARD", label: "صعب", icon: "⚔️", color: "#DC2626" },
-        ].map((diff) => (
-          <TouchableOpacity
-            key={diff.id}
-            style={[styles.difficultyButton, { backgroundColor: diff.color }]}
-            onPress={() => onQuizComplete(Math.floor(Math.random() * 100))}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.difficultyIcon}>{diff.icon}</Text>
-            <Text style={styles.difficultyLabel}>{diff.label}</Text>
-          </TouchableOpacity>
-        ))}
+          </>
+        ) : null}
       </View>
-    </View>
-  );
+    );
+  };
 
+  // ================= UI =================
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-right" size={24} color="#4F46E5" />
-          <Text style={styles.backButtonText}>رجوع</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.lessonHeader}>
           {completed && (
             <View style={styles.completedBadge}>
@@ -261,44 +124,86 @@ const LessonDetailScreen = ({ navigation, route }) => {
               <Text style={styles.completedText}>مكتمل</Text>
             </View>
           )}
+
           <Text style={styles.lessonTitle}>{lesson.title}</Text>
           <Text style={styles.lessonSubtitle}>{lesson.description}</Text>
         </View>
 
-        {/* Video Section */}
         {renderVideoSection()}
 
-        {/* Content */}
-        <View style={styles.contentSection}>
-          <Text style={styles.sectionTitle}>📖 المحتوى التعليمي</Text>
-          <Text style={styles.lessonContent}>
-            المغرب العربي منطقة في شمال أفريقيا تضم خمس دول: المغرب، الجزائر،
-            تونس، ليبيا، موريتانيا. تطل على البحر الأبيض المتوسط من الشمال
-            والمحيط الأطلسي من الغرب. تمتاز بتنوع جغرافي كبير من الجبال إلى
-            الصحاري.
-          </Text>
-        </View>
+        {/* 🔥 THIS IS WHERE lesson.content GOES 🔥 */}
+        {lesson.content?.map((block, index) => {
+          if (block.type === "text") {
+            return (
+              <View key={index} style={styles.contentSection}>
+                <Text style={styles.sectionTitle}>{block.title}</Text>
+                <Text style={styles.lessonContent}>{block.body}</Text>
+              </View>
+            );
+          }
 
-        {/* Fun Fact */}
-        <View style={styles.funFactCard}>
-          <Text style={styles.funFactIcon}>😲</Text>
-          <View style={styles.funFactContent}>
-            <Text style={styles.funFactLabel}>هل تعلم؟</Text>
-            <Text style={styles.funFactText}>
-              المغرب العربي يضم أكبر صحراء حارة في العالم!
-            </Text>
+          if (block.type === "fact") {
+            return (
+              <View key={index} style={styles.funFactCard}>
+                <Text style={styles.funFactIcon}>{block.emoji}</Text>
+                <View style={styles.funFactContent}>
+                  <Text style={styles.funFactLabel}>{block.title}</Text>
+                  <Text style={styles.funFactText}>{block.body}</Text>
+                </View>
+              </View>
+            );
+          }
+
+          return null;
+        })}
+
+        {/* QUIZ */}
+        <View style={styles.quizSection}>
+          <Text style={styles.sectionTitle}>🎯 اختبر معرفتك</Text>
+
+          <View style={styles.difficultyOptions}>
+            {["سهل", "متوسط", "صعب"].map((label, i) => (
+              <TouchableOpacity
+                key={i}
+                style={styles.difficultyButton}
+              >
+                <Text style={styles.difficultyLabel}>{label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
+        {/* <View style={styles.quizSection}>
+          <Text style={styles.sectionTitle}>🎯 اختبر معرفتك</Text>
+          <Text style={styles.quizSubtitle}>اختر مستوى الصعوبة:</Text>
 
-        {/* Quiz Section */}
-        {renderQuizSection()}
+          <View style={styles.difficultyOptions}>
+            {[
+              { id: "EASY", label: "سهل", icon: "🦁", color: "#10B981" },
+              { id: "MEDIUM", label: "متوسط", icon: "🧭", color: "#F59E0B" },
+              { id: "HARD", label: "صعب", icon: "⚔️", color: "#DC2626" },
+            ].map((diff) => (
+              <TouchableOpacity
+                key={diff.id}
+                style={[
+                  styles.difficultyButton,
+                  { backgroundColor: diff.color },
+                ]}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.difficultyIcon}>{diff.icon}</Text>
+                <Text style={styles.difficultyLabel}>{diff.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View> */}
 
-        {/* Interactive Tools */}
+        {/* ================= TOOLS ================= */}
         <View style={styles.toolsSection}>
           <TouchableOpacity style={styles.toolButton}>
             <Text style={styles.toolIcon}>🕶️</Text>
             <Text style={styles.toolText}>جولة 360°</Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={[styles.toolButton, styles.toolButtonAR]}>
             <Text style={styles.toolIcon}>📸</Text>
             <Text style={styles.toolText}>تجربة AR</Text>
@@ -310,14 +215,8 @@ const LessonDetailScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F8FAFF",
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-  },
+  container: { flex: 1, backgroundColor: "#F8FAFF", paddingHorizontal: 10 },
+  header: { paddingHorizontal: 16, paddingTop: 10 },
   backButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -328,174 +227,80 @@ const styles = StyleSheet.create({
     color: "#4F46E5",
     marginRight: 4,
   },
-  scrollView: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 10,
-  },
-  lessonHeader: {
-    marginBottom: 20,
-    alignItems: "flex-end",
-  },
+  scrollView: { paddingHorizontal: 16 },
+  lessonHeader: { marginBottom: 20, alignItems: "flex-end" },
   completedBadge: {
     flexDirection: "row",
     backgroundColor: "#10B981",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    alignItems: "center",
     marginBottom: 8,
-    alignSelf: "flex-start",
   },
   completedText: {
-    fontSize: 12,
     color: "#FFF",
-    fontWeight: "600",
+    fontSize: 12,
     marginRight: 4,
   },
   lessonTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1F2937",
-    marginBottom: 8,
     textAlign: "right",
   },
   lessonSubtitle: {
     fontSize: 16,
     color: "#6B7280",
     textAlign: "right",
-    lineHeight: 24,
   },
   videoContainer: {
-    aspectRatio: 16 / 9,
-    backgroundColor: "#000",
+    aspectRatio: 16 / 10,
+    backgroundColor: "#080101ff",
     borderRadius: 12,
     overflow: "hidden",
     marginBottom: 20,
-    position: "relative",
+    width: "100%", 
+    alignSelf: "center",
   },
-  videoPlayer: {
-    width: "100%",
-    height: "100%",
-  },
+  videoPlayer: { width: "100%", height: "100%" },
   videoPlaceholder: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#1F2937",
-    padding: 20,
   },
-  videoPlaceholderText: {
-    color: "#FFF",
-    fontSize: 14,
-    marginTop: 8,
-    textAlign: "center",
-  },
-  videoOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  playButtonOverlay: {
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    borderRadius: 50,
-    padding: 10,
-  },
+  videoPlaceholderText: { color: "#FFF", marginTop: 8 },
+  errorText: { color: "#FECACA" },
   controlsBar: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    padding: 12,
+    backgroundColor: "rgba(0,0,0,0.6)",
   },
-  timeText: {
-    color: "#FFF",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  errorText: {
-    color: "#FECACA",
-    fontSize: 14,
-    marginTop: 8,
-    textAlign: "center",
-  },
-  retryButton: {
-    marginTop: 12,
-    backgroundColor: "#4F46E5",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  retryText: {
-    color: "#FFF",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  contentSection: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#1F2937",
-    marginBottom: 12,
-    textAlign: "right",
-  },
+  timeText: { color: "#FFF" },
+  contentSection: { marginBottom: 20 },
+  sectionTitle: { fontSize: 18, fontWeight: "bold", textAlign: "right" },
   lessonContent: {
     fontSize: 16,
-    color: "#4B5563",
     lineHeight: 26,
     textAlign: "right",
   },
   funFactCard: {
     backgroundColor: "#FEF3C7",
-    borderRadius: 12,
     padding: 16,
+    borderRadius: 12,
     flexDirection: "row",
-    alignItems: "center",
     marginBottom: 20,
   },
-  funFactIcon: {
-    fontSize: 32,
-    marginRight: 12,
-  },
-  funFactContent: {
-    flex: 1,
-    alignItems: "flex-end",
-  },
-  funFactLabel: {
-    fontSize: 12,
-    color: "#92400E",
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  funFactText: {
-    fontSize: 16,
-    color: "#92400E",
-    fontWeight: "600",
-  },
-  quizSection: {
-    marginBottom: 20,
-  },
-  quizSubtitle: {
-    fontSize: 16,
-    color: "#6B7280",
-    marginBottom: 16,
-    textAlign: "right",
-  },
-  difficultyOptions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
+  funFactIcon: { fontSize: 32, marginRight: 12 },
+  funFactContent: { flex: 1, alignItems: "flex-end" },
+  funFactLabel: { fontSize: 12, fontWeight: "bold" },
+  funFactText: { fontSize: 16, fontWeight: "600" },
+  quizSection: { marginBottom: 20 },
+  quizSubtitle: { fontSize: 16, textAlign: "right" },
+  difficultyOptions: { flexDirection: "row" },
   difficultyButton: {
     flex: 1,
     marginHorizontal: 4,
@@ -503,40 +308,19 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
   },
-  difficultyIcon: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  difficultyLabel: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#FFF",
-  },
-  toolsSection: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 40,
-  },
+  difficultyLabel: { color: "#FFF", fontWeight: "bold" },
+  toolsSection: { flexDirection: "row", marginBottom: 40 },
   toolButton: {
     flex: 1,
-    backgroundColor: "#7C3AED",
     paddingVertical: 16,
     borderRadius: 12,
-    alignItems: "center",
     marginHorizontal: 4,
+    backgroundColor: "#7C3AED",
+    alignItems: "center",
   },
-  toolButtonAR: {
-    backgroundColor: "#059669",
-  },
-  toolIcon: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  toolText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#FFF",
-  },
+  toolButtonAR: { backgroundColor: "#059669" },
+  toolIcon: { fontSize: 24 },
+  toolText: { color: "#FFF", fontWeight: "600" },
 });
 
 export default LessonDetailScreen;
