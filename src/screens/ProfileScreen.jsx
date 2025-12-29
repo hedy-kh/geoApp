@@ -16,9 +16,11 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '../hooks/AuthContext';
 const { width } = Dimensions.get('window');
 
 const ProfileScreen = ({ navigation, route }) => {
+  const { user,logout } = useAuth();
   const role = route?.params?.role || 'student';
   
   const [isEditing, setIsEditing] = useState(false);
@@ -128,24 +130,16 @@ const ProfileScreen = ({ navigation, route }) => {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'تسجيل الخروج',
-      'هل أنت متأكد من تسجيل الخروج؟',
-      [
-        { text: 'إلغاء', style: 'cancel' },
-        { 
-          text: 'تسجيل الخروج', 
-          style: 'destructive',
-          onPress: () => {
-            // Navigate back to onboarding
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Onboarding' }],
-            });
-          }
-        }
-      ]
-    );
+   Alert.alert("تسجيل الخروج", "هل أنت متأكد من تسجيل الخروج؟", [
+     { text: "إلغاء", style: "cancel" },
+     {
+       text: "تسجيل الخروج",
+       style: "destructive",
+       onPress: async () => {
+         await logout();
+       },
+     },
+   ]);
   };
 
   const handleSettingToggle = (key) => {

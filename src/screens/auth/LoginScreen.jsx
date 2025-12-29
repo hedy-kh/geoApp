@@ -13,188 +13,266 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AuthInput from '../../components/common/AuthInput';
 import { UserRoles } from '../../utils/constants';
+import { useAuth } from '../../hooks/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 const LoginScreen = ({ navigation, route }) => {
   const { role } = route.params;
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [loginMethod, setLoginMethod] = useState('email'); // 'email' or 'phone'
+  const [loginMethod, setLoginMethod] = useState("email"); // 'email' or 'phone'
 
+  //   const handleLogin = async () => {
+  //     if (!formData.email && !formData.phone) {
+  //       Alert.alert('خطأ', 'الرجاء إدخال البريد الإلكتروني أو رقم الهاتف');
+  //       return;
+  //     }
+
+  //     if (!formData.password) {
+  //       Alert.alert('خطأ', 'الرجاء إدخال كلمة المرور');
+  //       return;
+  //     }
+
+  //     if (formData.password.length < 6) {
+  //       Alert.alert('خطأ', 'كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+  //       return;
+  //     }
+
+  //     setLoading(true);
+  //     const result = await login(formData.email, formData.password);
+
+  //     console.log('Login data:', { ...formData, role });
+  //     setLoading(false);
+
+  //     // Simulate API call
+  //     setTimeout(() => {
+  //       setLoading(false);
+
+  //       // For demo, navigate to dashboard based on role
+  //       Alert.alert(
+  //         'تم الدخول بنجاح',
+  //         `مرحباً بك في فضاء ${getRoleTitle()}`,
+  //         [
+  //           {
+  //             text: 'متابعة',
+  //             onPress: () => {
+  //                 switch (role) {
+  //   case UserRoles.STUDENT:
+  //     navigation.reset({
+  //       index: 0,
+  //       routes: [{ name: 'App', params: { role: 'student' } }],
+  //     });
+  //     break;
+
+  //   case UserRoles.TEACHER:
+  //     navigation.reset({
+  //       index: 0,
+  //       routes: [{ name: 'App', params: { role: 'teacher' } }],
+  //     });
+  //     break;
+
+  //   case UserRoles.PARENT:
+  //     navigation.reset({
+  //       index: 0,
+  //       routes: [{ name: 'App', params: { role: 'parent' } }],
+  //     });
+  //     break;
+  // }
+
+  //             }
+  //           }
+  //         ]
+  //       );
+  //     }, 2000);
+  //   };
+  // Updated handleLogin function in LoginScreen.jsx
   const handleLogin = async () => {
-    // Validation
-    if (!formData.email && !formData.phone) {
-      Alert.alert('خطأ', 'الرجاء إدخال البريد الإلكتروني أو رقم الهاتف');
+    // Simplified validation - Use email only for now
+    if (!formData.email) {
+      Alert.alert("خطأ", "الرجاء إدخال البريد الإلكتروني");
       return;
     }
 
     if (!formData.password) {
-      Alert.alert('خطأ', 'الرجاء إدخال كلمة المرور');
+      Alert.alert("خطأ", "الرجاء إدخال كلمة المرور");
       return;
     }
 
     if (formData.password.length < 6) {
-      Alert.alert('خطأ', 'كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      Alert.alert("خطأ", "كلمة المرور يجب أن تكون 6 أحرف على الأقل");
       return;
     }
 
     setLoading(true);
-    
-    // TODO: Firebase login logic will go here
-    console.log('Login data:', { ...formData, role });
-    
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      
-      // For demo, navigate to dashboard based on role
-      Alert.alert(
-        'تم الدخول بنجاح', 
-        `مرحباً بك في فضاء ${getRoleTitle()}`,
-        [
-          {
-            text: 'متابعة',
-            onPress: () => {
-                switch (role) {
-  case UserRoles.STUDENT:
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'App', params: { role: 'student' } }],
-    });
-    break;
 
-  case UserRoles.TEACHER:
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'App', params: { role: 'teacher' } }],
-    });
-    break;
+    try {
+      // Call Firebase login function
+      const result = await login(formData.email, formData.password);
 
-  case UserRoles.PARENT:
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'App', params: { role: 'parent' } }],
-    });
-    break;
-}
+      if (result.success) {
+        // Login successful - Show success message
+        console.log("Login successful");
 
-            }
+        // The navigation will happen automatically through AuthContext
+        // No need to navigate manually
+
+        Alert.alert("تم الدخول بنجاح", `مرحباً بك في فضاء ${getRoleTitle()}`, [
+          { text: "متابعة" },
+        ]);
+      } else {
+        // Handle errors
+        let errorMessage = "حدث خطأ أثناء تسجيل الدخول";
+
+        if (result.error) {
+          if (result.error.includes("auth/user-not-found")) {
+            errorMessage = "المستخدم غير موجود";
+          } else if (result.error.includes("auth/wrong-password")) {
+            errorMessage = "كلمة المرور غير صحيحة";
+          } else if (result.error.includes("auth/invalid-email")) {
+            errorMessage = "البريد الإلكتروني غير صالح";
+          } else if (result.error.includes("auth/too-many-requests")) {
+            errorMessage = "تم محاولة الدخول مرات عديدة. حاول لاحقاً";
+          } else if (result.error.includes("auth/user-disabled")) {
+            errorMessage = "تم تعطيل هذا الحساب";
           }
-        ]
-      );
-    }, 2000);
-  };
+        }
 
+        Alert.alert("خطأ", errorMessage);
+        setFormData((prev) => ({ ...prev, password: "" }));
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      Alert.alert("خطأ", "حدث خطأ غير متوقع");
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleForgotPassword = () => {
-    navigation.navigate('ForgotPassword', { role });
+    navigation.navigate("ForgotPassword", { role });
   };
 
   const getRoleTitle = () => {
-    switch(role) {
-      case UserRoles.STUDENT: return 'التلميذ';
-      case UserRoles.TEACHER: return 'المعلم';
-      case UserRoles.PARENT: return 'ولي الأمر';
-      default: return 'المستخدم';
+    switch (role) {
+      case UserRoles.STUDENT:
+        return "التلميذ";
+      case UserRoles.TEACHER:
+        return "المعلم";
+      case UserRoles.PARENT:
+        return "ولي الأمر";
+      default:
+        return "المستخدم";
     }
   };
 
   const getRoleWelcomeText = () => {
-    switch(role) {
+    switch (role) {
       case UserRoles.STUDENT:
-        return 'سجل الدخول للوصول إلى دروسك التفاعلية وتحديات الواقع المعزز';
+        return "سجل الدخول للوصول إلى دروسك التفاعلية وتحديات الواقع المعزز";
       case UserRoles.TEACHER:
-        return 'سجل الدخول لإدارة فصلك الدراسي ومتابعة أداء الطلاب';
+        return "سجل الدخول لإدارة فصلك الدراسي ومتابعة أداء الطلاب";
       case UserRoles.PARENT:
-        return 'سجل الدخول لمتابعة مستوى أبنائك والتواصل مع المعلمين';
+        return "سجل الدخول لمتابعة مستوى أبنائك والتواصل مع المعلمين";
       default:
-        return 'سجل الدخول إلى حسابك';
+        return "سجل الدخول إلى حسابك";
     }
   };
 
   const getRoleIcon = () => {
-    switch(role) {
-      case UserRoles.STUDENT: return 'school';
-      case UserRoles.TEACHER: return 'account-tie';
-      case UserRoles.PARENT: return 'account-group';
-      default: return 'account';
+    switch (role) {
+      case UserRoles.STUDENT:
+        return "school";
+      case UserRoles.TEACHER:
+        return "account-tie";
+      case UserRoles.PARENT:
+        return "account-group";
+      default:
+        return "account";
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.backButton}
               onPress={() => navigation.goBack()}
             >
               <Icon name="arrow-right" size={24} color="#4F46E5" />
               <Text style={styles.backButtonText}>رجوع</Text>
             </TouchableOpacity>
-            
+
             <View style={styles.roleHeader}>
-              <View style={[styles.roleIconContainer, { backgroundColor: getRoleColor() }]}>
+              <View
+                style={[
+                  styles.roleIconContainer,
+                  { backgroundColor: getRoleColor() },
+                ]}
+              >
                 <Icon name={getRoleIcon()} size={40} color="#FFFFFF" />
               </View>
               <Text style={styles.title}>تسجيل الدخول</Text>
               <Text style={styles.roleTitle}>فضاء {getRoleTitle()}</Text>
-              <Text style={styles.subtitle}>
-                {getRoleWelcomeText()}
-              </Text>
+              <Text style={styles.subtitle}>{getRoleWelcomeText()}</Text>
             </View>
           </View>
 
           <View style={styles.form}>
             {/* Login Method Toggle */}
             <View style={styles.loginMethodContainer}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[
                   styles.methodButton,
-                  loginMethod === 'email' && styles.methodButtonActive
+                  loginMethod === "email" && styles.methodButtonActive,
                 ]}
-                onPress={() => setLoginMethod('email')}
+                onPress={() => setLoginMethod("email")}
               >
-                <Icon 
-                  name="email" 
-                  size={20} 
-                  color={loginMethod === 'email' ? '#FFFFFF' : '#6B7280'} 
+                <Icon
+                  name="email"
+                  size={20}
+                  color={loginMethod === "email" ? "#FFFFFF" : "#6B7280"}
                 />
-                <Text style={[
-                  styles.methodButtonText,
-                  loginMethod === 'email' && styles.methodButtonTextActive
-                ]}>
+                <Text
+                  style={[
+                    styles.methodButtonText,
+                    loginMethod === "email" && styles.methodButtonTextActive,
+                  ]}
+                >
                   البريد الإلكتروني
                 </Text>
               </TouchableOpacity>
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[
                   styles.methodButton,
-                  loginMethod === 'phone' && styles.methodButtonActive
+                  loginMethod === "phone" && styles.methodButtonActive,
                 ]}
-                onPress={() => setLoginMethod('phone')}
+                onPress={() => setLoginMethod("phone")}
               >
-                <Icon 
-                  name="phone" 
-                  size={20} 
-                  color={loginMethod === 'phone' ? '#FFFFFF' : '#6B7280'} 
+                <Icon
+                  name="phone"
+                  size={20}
+                  color={loginMethod === "phone" ? "#FFFFFF" : "#6B7280"}
                 />
-                <Text style={[
-                  styles.methodButtonText,
-                  loginMethod === 'phone' && styles.methodButtonTextActive
-                ]}>
+                <Text
+                  style={[
+                    styles.methodButtonText,
+                    loginMethod === "phone" && styles.methodButtonTextActive,
+                  ]}
+                >
                   رقم الهاتف
                 </Text>
               </TouchableOpacity>
@@ -202,12 +280,20 @@ const LoginScreen = ({ navigation, route }) => {
 
             {/* Email/Phone Input */}
             <AuthInput
-              label={loginMethod === 'email' ? 'البريد الإلكتروني' : 'رقم الهاتف'}
+              label={
+                loginMethod === "email" ? "البريد الإلكتروني" : "رقم الهاتف"
+              }
               value={formData.email}
-              onChangeText={(value) => setFormData({...formData, email: value})}
-              placeholder={loginMethod === 'email' ? 'example@email.com' : '05XXXXXXXX'}
-              icon={loginMethod === 'email' ? 'email' : 'phone'}
-              keyboardType={loginMethod === 'email' ? 'email-address' : 'phone-pad'}
+              onChangeText={(value) =>
+                setFormData({ ...formData, email: value })
+              }
+              placeholder={
+                loginMethod === "email" ? "example@email.com" : "05XXXXXXXX"
+              }
+              icon={loginMethod === "email" ? "email" : "phone"}
+              keyboardType={
+                loginMethod === "email" ? "email-address" : "phone-pad"
+              }
               required
             />
 
@@ -215,9 +301,11 @@ const LoginScreen = ({ navigation, route }) => {
             <AuthInput
               label="كلمة المرور"
               value={formData.password}
-              onChangeText={(value) => setFormData({...formData, password: value})}
+              onChangeText={(value) =>
+                setFormData({ ...formData, password: value })
+              }
               placeholder="أدخل كلمة المرور"
-              icon={showPassword ? 'eye-off' : 'eye'}
+              icon={showPassword ? "eye-off" : "eye"}
               secureTextEntry={!showPassword}
               onIconPress={() => setShowPassword(!showPassword)}
               required
@@ -225,14 +313,18 @@ const LoginScreen = ({ navigation, route }) => {
 
             {/* Remember Me & Forgot Password */}
             <View style={styles.rememberContainer}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.rememberButton}
-                onPress={() => setFormData({...formData, rememberMe: !formData.rememberMe})}
+                onPress={() =>
+                  setFormData({ ...formData, rememberMe: !formData.rememberMe })
+                }
               >
-                <View style={[
-                  styles.checkbox,
-                  formData.rememberMe && styles.checkboxChecked
-                ]}>
+                <View
+                  style={[
+                    styles.checkbox,
+                    formData.rememberMe && styles.checkboxChecked,
+                  ]}
+                >
                   {formData.rememberMe && (
                     <Icon name="check" size={14} color="#FFFFFF" />
                   )}
@@ -246,8 +338,11 @@ const LoginScreen = ({ navigation, route }) => {
             </View>
 
             {/* Login Button */}
-            <TouchableOpacity 
-              style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+            <TouchableOpacity
+              style={[
+                styles.loginButton,
+                loading && styles.loginButtonDisabled,
+              ]}
               onPress={handleLogin}
               disabled={loading}
             >
@@ -272,12 +367,16 @@ const LoginScreen = ({ navigation, route }) => {
             <View style={styles.socialContainer}>
               <Text style={styles.socialText}>سجل الدخول باستخدام</Text>
               <View style={styles.socialButtons}>
-                <TouchableOpacity style={[styles.socialButton, styles.googleButton]}>
+                <TouchableOpacity
+                  style={[styles.socialButton, styles.googleButton]}
+                >
                   <Icon name="google" size={24} color="#DB4437" />
                   <Text style={styles.socialButtonText}>Google</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity style={[styles.socialButton, styles.appleButton]}>
+
+                <TouchableOpacity
+                  style={[styles.socialButton, styles.appleButton]}
+                >
                   <Icon name="facebook" size={24} color="#e6e7edff" />
                   <Text style={styles.socialButtonText}>facebook</Text>
                 </TouchableOpacity>
@@ -287,7 +386,9 @@ const LoginScreen = ({ navigation, route }) => {
             {/* Signup Link */}
             <View style={styles.signupContainer}>
               <Text style={styles.signupText}>لا تملك حساباً؟</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Signup', { role })}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("Signup", { role })}
+              >
                 <Text style={styles.signupLinkText}>أنشئ حساباً جديداً</Text>
               </TouchableOpacity>
             </View>

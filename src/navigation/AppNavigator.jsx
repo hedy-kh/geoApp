@@ -17,6 +17,7 @@ import StudentTrophy from '../screens/student/StudentTrophy';
 import MemoryGameScreen from '../screens/student/games/MemoryGameScreen';
 import AdventureGameScreen from '../screens/student/games/AdventureGameScreen';
 import PuzzleGameScreen from '../screens/student/games/PuzzleGameScreen';
+import { useAuth } from '../hooks/AuthContext';
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -35,6 +36,15 @@ const StudentGamesStack = () => {
   );
 };
 const StudentTabNavigator = () => {
+  const { user } = useAuth();
+  
+  if (!user || user.role !== 'student') {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>ليس لديك صلاحية للوصول</Text>
+      </View>
+    );
+  }
   return (
     <Tab.Navigator
       screenOptions={{
@@ -253,10 +263,13 @@ const ParentDrawerNavigator = () => {
   );
 };
 
-const AppNavigator = ({ route }) => {
-  const { role } = route.params;
-
-  switch (role) {
+const AppNavigator = () => {
+  const { user } = useAuth();
+  if (!user) {
+    console.log('app navigator error');
+    return null
+  }
+  switch (user.role) {
     case 'student':
       return <StudentTabNavigator />;
     case 'teacher':
