@@ -162,7 +162,7 @@ const MemoryGameScreen = ({ navigation }) => {
         setTimer((prev) => prev + 1);
       }, 1000);
       setGameTimer(newTimer);
-    }, 3000);
+    }, 5000);
   };
 
   const handleCardPress = (cardId) => {

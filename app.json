@@ -31,7 +31,14 @@
         {
           "microphonePermission": "Allow جغرافي to access your microphone."
         }
-      ]
+      ],
+      [
+      "expo-video",
+      {
+        "supportsBackgroundPlayback": true,
+        "supportsPictureInPicture": true
+      }
+    ]
     ]
   }
 }

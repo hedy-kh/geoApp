@@ -23,6 +23,7 @@
     "expo-camera": "^17.0.10",
     "expo-image-picker": "^17.0.10",
     "expo-status-bar": "~3.0.9",
+    "expo-video": "~3.0.15",
     "firebase": "^12.7.0",
     "i18next": "^25.7.3",
     "lucide-react": "^0.562.0",
