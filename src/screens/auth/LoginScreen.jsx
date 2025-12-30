@@ -92,7 +92,6 @@ const LoginScreen = ({ navigation, route }) => {
   //   };
   // Updated handleLogin function in LoginScreen.jsx
   const handleLogin = async () => {
-    // Simplified validation - Use email only for now
     if (!formData.email) {
       Alert.alert("خطأ", "الرجاء إدخال البريد الإلكتروني");
       return;
@@ -109,23 +108,14 @@ const LoginScreen = ({ navigation, route }) => {
     }
 
     setLoading(true);
-
     try {
-      // Call Firebase login function
       const result = await login(formData.email, formData.password);
-
       if (result.success) {
-        // Login successful - Show success message
         console.log("Login successful");
-
-        // The navigation will happen automatically through AuthContext
-        // No need to navigate manually
-
         Alert.alert("تم الدخول بنجاح", `مرحباً بك في فضاء ${getRoleTitle()}`, [
           { text: "متابعة" },
         ]);
       } else {
-        // Handle errors
         let errorMessage = "حدث خطأ أثناء تسجيل الدخول";
 
         if (result.error) {

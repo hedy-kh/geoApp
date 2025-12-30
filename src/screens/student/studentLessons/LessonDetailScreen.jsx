@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { VideoView } from "expo-video";
 import YoutubePlayer from "react-native-youtube-iframe";
 import useVideo from "../../../hooks/useVideo";
+import StudentAR from "./StudentAR";
 
 const { width } = Dimensions.get("window");
 
@@ -163,10 +164,7 @@ const LessonDetailScreen = ({ navigation, route }) => {
 
           <View style={styles.difficultyOptions}>
             {["سهل", "متوسط", "صعب"].map((label, i) => (
-              <TouchableOpacity
-                key={i}
-                style={styles.difficultyButton}
-              >
+              <TouchableOpacity key={i} style={styles.difficultyButton}>
                 <Text style={styles.difficultyLabel}>{label}</Text>
               </TouchableOpacity>
             ))}
@@ -198,17 +196,7 @@ const LessonDetailScreen = ({ navigation, route }) => {
         </View> */}
 
         {/* ================= TOOLS ================= */}
-        <View style={styles.toolsSection}>
-          <TouchableOpacity style={styles.toolButton}>
-            <Text style={styles.toolIcon}>🕶️</Text>
-            <Text style={styles.toolText}>جولة 360°</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={[styles.toolButton, styles.toolButtonAR]}>
-            <Text style={styles.toolIcon}>📸</Text>
-            <Text style={styles.toolText}>تجربة AR</Text>
-          </TouchableOpacity>
-        </View>
+        <StudentAR arViewId={lesson.arId} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -309,18 +297,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   difficultyLabel: { color: "#FFF", fontWeight: "bold" },
-  toolsSection: { flexDirection: "row", marginBottom: 40 },
-  toolButton: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 12,
-    marginHorizontal: 4,
-    backgroundColor: "#7C3AED",
-    alignItems: "center",
-  },
-  toolButtonAR: { backgroundColor: "#059669" },
-  toolIcon: { fontSize: 24 },
-  toolText: { color: "#FFF", fontWeight: "600" },
 });
 
 export default LessonDetailScreen;

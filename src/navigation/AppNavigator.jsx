@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, Text } from "react-native";
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -43,6 +44,7 @@ const StudentTabNavigator = () => {
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <Text>ليس لديك صلاحية للوصول</Text>
       </View>
+      
     );
   }
   return (
@@ -266,9 +268,13 @@ const ParentDrawerNavigator = () => {
 const AppNavigator = () => {
   const { user } = useAuth();
   if (!user) {
-    console.log('app navigator error');
-    return null
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Loading...</Text>
+      </View>
+    );
   }
+
   switch (user.role) {
     case 'student':
       return <StudentTabNavigator />;

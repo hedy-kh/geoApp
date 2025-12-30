@@ -308,7 +308,6 @@ const SignupScreen = ({ navigation, route }) => {
       Alert.alert("نجاح", `تم إنشاء حساب ${getRoleTitle()} بنجاح`, [
         {
           text: "تم",
-          onPress: () => navigation.navigate("Login", { role }),
         },
       ]);
     } else {
@@ -325,28 +324,6 @@ const SignupScreen = ({ navigation, route }) => {
 
       Alert.alert("خطأ", errorMessage);
     }
-
-    console.log("Signup data:", { ...formData, role });
-
-    setTimeout(() => {
-      setLoading(false);
-      Alert.alert(
-        "نجاح",
-        `تم إنشاء حساب ${
-          role === UserRoles.STUDENT
-            ? "التلميذ"
-            : role === UserRoles.TEACHER
-            ? "المعلم"
-            : "ولي الأمر"
-        } بنجاح`,
-        [
-          {
-            text: "تم",
-            onPress: () => navigation.navigate("Login", { role }),
-          },
-        ]
-      );
-    }, 2000);
   };
 
   const getRoleTitle = () => {

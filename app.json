@@ -33,12 +33,11 @@
         }
       ],
       [
-      "expo-video",
-      {
-        "supportsBackgroundPlayback": true,
-        "supportsPictureInPicture": true
-      }
-    ]
-    ]
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": true,
+          "supportsPictureInPicture": true
+        }
+      ]    ]
   }
 }
