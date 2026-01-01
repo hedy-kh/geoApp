@@ -1,43 +1,69 @@
 {
   "expo": {
     "name": "جغرافي",
-    "slug": "جغرافي",
+    "slug": "GEOKids",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
     "ios": {
       "supportsTablet": true
     },
+
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+
+      "package": "com.faycelguedri"
     },
+
     "web": {
       "favicon": "./assets/favicon.png"
     },
+
     "plugins": [
+      "@reactvision/react-viro",
+
       [
         "expo-audio",
         {
           "microphonePermission": "Allow جغرافي to access your microphone."
         }
       ],
+
       [
         "expo-video",
         {
           "supportsBackgroundPlayback": true,
           "supportsPictureInPicture": true
         }
-      ]    ]
+      ],
+
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "ndkVersion": "29.0.14206865"
+          }
+        }
+      ]
+    ]
   }
 }
