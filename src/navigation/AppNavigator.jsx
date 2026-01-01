@@ -18,6 +18,7 @@ import StudentTrophy from '../screens/student/StudentTrophy';
 import MemoryGameScreen from '../screens/student/games/MemoryGameScreen';
 import AdventureGameScreen from '../screens/student/games/AdventureGameScreen';
 import PuzzleGameScreen from '../screens/student/games/PuzzleGameScreen';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../hooks/AuthContext';
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
@@ -38,7 +39,7 @@ const StudentGamesStack = () => {
 };
 const StudentTabNavigator = () => {
   const { user } = useAuth();
-  
+  const insets = useSafeAreaInsets();
   if (!user || user.role !== 'student') {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -50,28 +51,29 @@ const StudentTabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#4F46E5',
-        tabBarInactiveTintColor: '#9CA3AF',
+        tabBarActiveTintColor: "#4F46E5",
+        tabBarInactiveTintColor: "#9CA3AF",
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: "#FFFFFF",
           borderTopWidth: 1,
-          borderTopColor: '#E5E7EB',
-          height: 70,
-          paddingBottom: 10,
-          paddingTop: 10,
+          borderTopColor: "#E5E7EB",
+          height: 55+insets.bottom,
+          paddingBottom: insets.bottom,
+          paddingTop: 5,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '600',
+          fontWeight: "600",
         },
         headerShown: false,
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tab.Screen
         name="StudentHome"
         component={StudentDashboard}
         options={{
-          tabBarLabel: 'الرئيسية',
+          tabBarLabel: "الرئيسية",
           tabBarIcon: ({ color, size }) => (
             <Icon name="home" size={size} color={color} />
           ),
@@ -81,7 +83,7 @@ const StudentTabNavigator = () => {
         name="Lessons"
         component={StudentLessonsStack}
         options={{
-          tabBarLabel: 'دروسي',
+          tabBarLabel: "دروسي",
           tabBarIcon: ({ color, size }) => (
             <Icon name="book-open" size={size} color={color} />
           ),
@@ -89,27 +91,29 @@ const StudentTabNavigator = () => {
       />
       <Tab.Screen
         name="Games"
-        component={StudentGamesStack} 
+        component={StudentGamesStack}
         options={{
-          tabBarLabel: 'الألعاب',
+          tabBarLabel: "الألعاب",
           tabBarIcon: ({ color, size }) => (
             <Icon name="gamepad-variant" size={size} color={color} />
           ),
         }}
       />
-      <Tab.Screen name='Trophy' component={StudentTrophy}
+      <Tab.Screen
+        name="Trophy"
+        component={StudentTrophy}
         options={{
-          tabBarLabel: 'إنجازاتي',
-          tabBarIcon: ({color,size}) => (
-            <Icon name='trophy' size={size} color={color}/>
-          )
+          tabBarLabel: "إنجازاتي",
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="trophy" size={size} color={color} />
+          ),
         }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarLabel: 'حسابي',
+          tabBarLabel: "حسابي",
           tabBarIcon: ({ color, size }) => (
             <Icon name="account" size={size} color={color} />
           ),

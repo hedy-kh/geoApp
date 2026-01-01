@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { View,TouchableOpacity,Text,StyleSheet} from "react-native";
-
+import { AR_VIEWS } from '../../../utils/arViews'; 
 const StudentAR = ({ arViewId = 1 }) => {
   const navigation = useNavigation();
   const currentAR = AR_VIEWS.find((v) => v.id === arViewId);
