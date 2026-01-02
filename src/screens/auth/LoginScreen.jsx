@@ -25,72 +25,7 @@ const LoginScreen = ({ navigation, route }) => {
     rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [loginMethod, setLoginMethod] = useState("email"); // 'email' or 'phone'
-
-  //   const handleLogin = async () => {
-  //     if (!formData.email && !formData.phone) {
-  //       Alert.alert('خطأ', 'الرجاء إدخال البريد الإلكتروني أو رقم الهاتف');
-  //       return;
-  //     }
-
-  //     if (!formData.password) {
-  //       Alert.alert('خطأ', 'الرجاء إدخال كلمة المرور');
-  //       return;
-  //     }
-
-  //     if (formData.password.length < 6) {
-  //       Alert.alert('خطأ', 'كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-  //       return;
-  //     }
-
-  //     setLoading(true);
-  //     const result = await login(formData.email, formData.password);
-
-  //     console.log('Login data:', { ...formData, role });
-  //     setLoading(false);
-
-  //     // Simulate API call
-  //     setTimeout(() => {
-  //       setLoading(false);
-
-  //       // For demo, navigate to dashboard based on role
-  //       Alert.alert(
-  //         'تم الدخول بنجاح',
-  //         `مرحباً بك في فضاء ${getRoleTitle()}`,
-  //         [
-  //           {
-  //             text: 'متابعة',
-  //             onPress: () => {
-  //                 switch (role) {
-  //   case UserRoles.STUDENT:
-  //     navigation.reset({
-  //       index: 0,
-  //       routes: [{ name: 'App', params: { role: 'student' } }],
-  //     });
-  //     break;
-
-  //   case UserRoles.TEACHER:
-  //     navigation.reset({
-  //       index: 0,
-  //       routes: [{ name: 'App', params: { role: 'teacher' } }],
-  //     });
-  //     break;
-
-  //   case UserRoles.PARENT:
-  //     navigation.reset({
-  //       index: 0,
-  //       routes: [{ name: 'App', params: { role: 'parent' } }],
-  //     });
-  //     break;
-  // }
-
-  //             }
-  //           }
-  //         ]
-  //       );
-  //     }, 2000);
-  //   };
-  // Updated handleLogin function in LoginScreen.jsx
+  const [loginMethod, setLoginMethod] = useState("email"); 
   const handleLogin = async () => {
     if (!formData.email) {
       Alert.alert("خطأ", "الرجاء إدخال البريد الإلكتروني");
@@ -372,8 +307,6 @@ const LoginScreen = ({ navigation, route }) => {
                 </TouchableOpacity>
               </View>
             </View>
-
-            {/* Signup Link */}
             <View style={styles.signupContainer}>
               <Text style={styles.signupText}>لا تملك حساباً؟</Text>
               <TouchableOpacity
@@ -383,21 +316,11 @@ const LoginScreen = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
           </View>
-
-          {/* Demo Credentials Banner */}
-          <View style={styles.demoBanner}>
-            <Icon name="information" size={20} color="#FFFFFF" />
-            <Text style={styles.demoText}>
-              تجربة التطبيق: يمكنك استخدام بيانات تجريبية للدخول
-            </Text>
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
-
-// Helper function for role colors
 const getRoleColor = (role) => {
   switch(role) {
     case UserRoles.STUDENT: return '#3B82F6';
@@ -659,7 +582,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// Add color styles for social buttons
 styles.googleButtonText = {
   ...styles.socialButtonText,
   color: '#DB4437',

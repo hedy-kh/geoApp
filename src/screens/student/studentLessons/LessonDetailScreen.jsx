@@ -7,6 +7,7 @@ import {
   ScrollView,
   Dimensions,
   Alert,
+  Image,
   ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -14,15 +15,34 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { VideoView } from "expo-video";
 import YoutubePlayer from "react-native-youtube-iframe";
 import useVideo from "../../../hooks/useVideo";
+import CardSection from "../../../components/reusable/CardSection";
 import StudentAR from "./StudentAR";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
+const isSmallScreen = width < 375;
+const isLargeScreen = width > 414;
 
 const getYouTubeVideoId = (url) => {
   const regExp =
     /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]{11}).*/;
   const match = url.match(regExp);
   return match ? match[2] : null;
+};
+
+const FunFactSection = ({ funFactData }) => {
+  if (!funFactData) return null;
+
+  return (
+    <View style={styles.funFactContainer}>
+      <Text style={styles.funFactEmoji}>{funFactData.emoji}</Text>
+      <View style={styles.funFactContent}>
+        <Text style={styles.funFactLabel}>{funFactData.title}</Text>
+        <Text style={styles.funFactText} numberOfLines={4}>
+          {funFactData.body}
+        </Text>
+      </View>
+    </View>
+  );
 };
 
 const LessonDetailScreen = ({ navigation, route }) => {
@@ -58,12 +78,18 @@ const LessonDetailScreen = ({ navigation, route }) => {
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  // ================= VIDEO RENDER =================
+  const cardData = lesson.content?.find((item) => item.card)?.card || null;
+  const funFactData = lesson.content?.find((item) => item.type === "fact");
+
   const renderVideoSection = () => {
     if (isYoutube && youtubeVideoId) {
       return (
         <View style={styles.videoContainer}>
-          <YoutubePlayer height={220} play={false} videoId={youtubeVideoId} />
+          <YoutubePlayer
+            height={isSmallScreen ? 180 : isLargeScreen ? 240 : 220}
+            play={false}
+            videoId={youtubeVideoId}
+          />
         </View>
       );
     }
@@ -108,7 +134,6 @@ const LessonDetailScreen = ({ navigation, route }) => {
     );
   };
 
-  // ================= UI =================
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -117,7 +142,10 @@ const LessonDetailScreen = ({ navigation, route }) => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         <View style={styles.lessonHeader}>
           {completed && (
             <View style={styles.completedBadge}>
@@ -132,45 +160,15 @@ const LessonDetailScreen = ({ navigation, route }) => {
 
         {renderVideoSection()}
 
-        {/* 🔥 THIS IS WHERE lesson.content GOES 🔥 */}
-        {lesson.content?.map((block, index) => {
-          if (block.type === "text") {
-            return (
-              <View key={index} style={styles.contentSection}>
-                <Text style={styles.sectionTitle}>{block.title}</Text>
-                <Text style={styles.lessonContent}>{block.body}</Text>
-              </View>
-            );
-          }
+        {/* ================= CARD SECTION ================= */}
+        {lesson.content?.find((item) => item.cards) && (
+          <CardSection cardData={lesson.content.find((item) => item.cards)} />
+        )}
+        {/* ================= FUN FACT SECTION ================= */}
+        {funFactData && <FunFactSection funFactData={funFactData} />}
 
-          if (block.type === "fact") {
-            return (
-              <View key={index} style={styles.funFactCard}>
-                <Text style={styles.funFactIcon}>{block.emoji}</Text>
-                <View style={styles.funFactContent}>
-                  <Text style={styles.funFactLabel}>{block.title}</Text>
-                  <Text style={styles.funFactText}>{block.body}</Text>
-                </View>
-              </View>
-            );
-          }
-
-          return null;
-        })}
-
-        {/* QUIZ */}
+        {/* ================= QUIZ SECTION ================= */}
         <View style={styles.quizSection}>
-          <Text style={styles.sectionTitle}>🎯 اختبر معرفتك</Text>
-
-          <View style={styles.difficultyOptions}>
-            {["سهل", "متوسط", "صعب"].map((label, i) => (
-              <TouchableOpacity key={i} style={styles.difficultyButton}>
-                <Text style={styles.difficultyLabel}>{label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        {/* <View style={styles.quizSection}>
           <Text style={styles.sectionTitle}>🎯 اختبر معرفتك</Text>
           <Text style={styles.quizSubtitle}>اختر مستوى الصعوبة:</Text>
 
@@ -193,9 +191,9 @@ const LessonDetailScreen = ({ navigation, route }) => {
               </TouchableOpacity>
             ))}
           </View>
-        </View> */}
+        </View>
 
-        {/* ================= TOOLS ================= */}
+        {/* ================= AR TOOLS ================= */}
         <StudentAR arViewId={lesson.arId} />
       </ScrollView>
     </SafeAreaView>
@@ -203,20 +201,24 @@ const LessonDetailScreen = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F8FAFF", paddingHorizontal: 10 },
-  header: { paddingHorizontal: 16, paddingTop: 10 },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-end",
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFF",
   },
-  backButtonText: {
-    fontSize: 16,
-    color: "#4F46E5",
-    marginRight: 4,
+  scrollContent: {
+    paddingHorizontal: isSmallScreen ? 0 : 8,
+    paddingBottom: 20,
   },
-  scrollView: { paddingHorizontal: 16 },
-  lessonHeader: { marginBottom: 20, alignItems: "flex-end" },
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 2,
+  },
+  lessonHeader: {
+    marginBottom: 16,
+    alignItems: "flex-end",
+    paddingHorizontal: 16,
+  },
   completedBadge: {
     flexDirection: "row",
     backgroundColor: "#10B981",
@@ -224,6 +226,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     marginBottom: 8,
+    alignSelf: "flex-end",
   },
   completedText: {
     color: "#FFF",
@@ -231,32 +234,36 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   lessonTitle: {
-    fontSize: 24,
+    fontSize: isSmallScreen ? 20 : isLargeScreen ? 26 : 24,
     fontWeight: "bold",
     textAlign: "right",
+    marginBottom: 4,
   },
   lessonSubtitle: {
-    fontSize: 16,
+    fontSize: isSmallScreen ? 14 : 15,
     color: "#6B7280",
     textAlign: "right",
+    lineHeight: 22,
   },
   videoContainer: {
-    aspectRatio: 16 / 10,
+    aspectRatio: 16 / 9,
     backgroundColor: "#080101ff",
     borderRadius: 12,
     overflow: "hidden",
-    marginBottom: 20,
-    width: "100%", 
+    marginBottom: 16,
+    marginHorizontal: 16,
+    width: width - 32,
     alignSelf: "center",
   },
-  videoPlayer: { width: "100%", height: "100%" },
-  videoPlaceholder: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  videoPlayer: {
+    width: "100%",
+    height: "100%",
   },
-  videoPlaceholderText: { color: "#FFF", marginTop: 8 },
-  errorText: { color: "#FECACA" },
+  errorText: {
+    color: "#FECACA",
+    textAlign: "center",
+    padding: 20,
+  },
   controlsBar: {
     position: "absolute",
     bottom: 0,
@@ -267,36 +274,85 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: "rgba(0,0,0,0.6)",
   },
-  timeText: { color: "#FFF" },
-  contentSection: { marginBottom: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: "bold", textAlign: "right" },
-  lessonContent: {
-    fontSize: 16,
-    lineHeight: 26,
+  funFactContainer: {
+    backgroundColor: "#fef9c3",
+    padding: isSmallScreen ? 20 : 24,
+    borderRadius: isSmallScreen ? 24 : 28,
+    borderWidth: 3,
+    borderStyle: "dashed",
+    borderColor: "#fde047",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: isSmallScreen ? 16 : 20,
+    marginHorizontal: isSmallScreen ? 12 : 16,
+    marginBottom: 16,
+    minHeight: isSmallScreen ? 100 : 120,
+  },
+  funFactEmoji: {
+    fontSize: isSmallScreen ? 40 : isLargeScreen ? 50 : 44,
+  },
+  funFactContent: {
+    flex: 1,
+    alignItems: "flex-end",
+  },
+  funFactLabel: {
+    fontSize: isSmallScreen ? 12 : 13,
+    fontWeight: "bold",
+    color: "#ca8a04",
+    textTransform: "uppercase",
+    marginBottom: 6,
     textAlign: "right",
   },
-  funFactCard: {
-    backgroundColor: "#FEF3C7",
-    padding: 16,
-    borderRadius: 12,
-    flexDirection: "row",
-    marginBottom: 20,
+  funFactText: {
+    fontSize: isSmallScreen ? 16 : isLargeScreen ? 20 : 18,
+    fontWeight: "900",
+    color: "#713f12",
+    lineHeight: isSmallScreen ? 22 : 24,
+    textAlign: "right",
   },
-  funFactIcon: { fontSize: 32, marginRight: 12 },
-  funFactContent: { flex: 1, alignItems: "flex-end" },
-  funFactLabel: { fontSize: 12, fontWeight: "bold" },
-  funFactText: { fontSize: 16, fontWeight: "600" },
-  quizSection: { marginBottom: 20 },
-  quizSubtitle: { fontSize: 16, textAlign: "right" },
-  difficultyOptions: { flexDirection: "row" },
+  timeText: {
+    color: "#FFF",
+    fontSize: 14,
+  },
+  quizSection: {
+    marginBottom: 20,
+    marginTop: 8,
+    paddingHorizontal: 16,
+  },
+  sectionTitle: {
+    fontSize: isSmallScreen ? 17 : 18,
+    fontWeight: "bold",
+    textAlign: "right",
+    marginBottom: 8,
+  },
+  quizSubtitle: {
+    fontSize: isSmallScreen ? 14 : 15,
+    textAlign: "right",
+    color: "#6B7280",
+    marginBottom: 16,
+  },
+  difficultyOptions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 8,
+  },
   difficultyButton: {
     flex: 1,
-    marginHorizontal: 4,
-    paddingVertical: 16,
+    paddingVertical: isSmallScreen ? 12 : 16,
     borderRadius: 12,
     alignItems: "center",
+    justifyContent: "center",
+    minHeight: isSmallScreen ? 70 : 80,
   },
-  difficultyLabel: { color: "#FFF", fontWeight: "bold" },
+  difficultyLabel: {
+    color: "#FFF",
+    fontWeight: "bold",
+    fontSize: isSmallScreen ? 14 : 16,
+    marginTop: 6,
+  },
+  difficultyIcon: {
+    fontSize: isSmallScreen ? 24 : 26,
+  },
 });
 
 export default LessonDetailScreen;

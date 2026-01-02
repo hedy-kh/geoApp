@@ -1,7 +1,7 @@
 export const AR_VIEWS = [
   {
     id: 1,
-    name: "North Africa Map",
+    name: "المغرب العربي",
     type: "map_puzzle",
   },
   {
