@@ -200,6 +200,18 @@ export const LESSONS_DATA = {
         },
       ],
       arId: 1,
+      exercies: {
+        EASY: {
+          exercie1: "تمرين 1: تحديد الموقع على الخريطة",
+          exercie2: "تمرين 2: ربط الدولة بعاصمتها",
+        },
+        Meduim: {
+          
+        },
+        Hard: {
+
+        },
+      },
     },
 
     {

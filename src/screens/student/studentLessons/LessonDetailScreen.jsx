@@ -16,6 +16,7 @@ import { VideoView } from "expo-video";
 import YoutubePlayer from "react-native-youtube-iframe";
 import useVideo from "../../../hooks/useVideo";
 import CardSection from "../../../components/reusable/CardSection";
+import Exercies from "../../../components/reusable/Exercies";
 import StudentAR from "./StudentAR";
 
 const { width, height } = Dimensions.get("window");
@@ -48,6 +49,22 @@ const FunFactSection = ({ funFactData }) => {
 const LessonDetailScreen = ({ navigation, route }) => {
   const { lesson } = route.params;
   const [completed, setCompleted] = useState(lesson.isCompleted);
+  // ---------------- ADD THESE ----------------
+  const [showExercises, setShowExercises] = useState(false);
+  const [selectedDifficulty, setSelectedDifficulty] = useState(null);
+
+  const openExercises = (difficultyId) => {
+    setSelectedDifficulty({
+      lessonId: lesson.id,
+      unitId: route?.params?.unitId,
+      level: difficultyId,
+    });
+    setShowExercises(true);
+  };
+
+  const closeExercises = () => {
+    setShowExercises(false);
+  };
 
   const isYoutube = lesson.video?.type === "youtube";
   const videoUrl = lesson.video?.url;
@@ -78,7 +95,6 @@ const LessonDetailScreen = ({ navigation, route }) => {
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  const cardData = lesson.content?.find((item) => item.card)?.card || null;
   const funFactData = lesson.content?.find((item) => item.type === "fact");
 
   const renderVideoSection = () => {
@@ -185,11 +201,15 @@ const LessonDetailScreen = ({ navigation, route }) => {
                   { backgroundColor: diff.color },
                 ]}
                 activeOpacity={0.8}
+                onPress={() => openExercises(diff.id)}
               >
                 <Text style={styles.difficultyIcon}>{diff.icon}</Text>
                 <Text style={styles.difficultyLabel}>{diff.label}</Text>
               </TouchableOpacity>
             ))}
+            {showExercises && (
+              <Exercies details={selectedDifficulty} onClose={closeExercises} />
+            )}
           </View>
         </View>
 
