@@ -2,7 +2,6 @@ import { View, Text, StyleSheet } from "react-native";
 import React, { useState, useEffect } from "react";
 import Svg, { Path, G } from "react-native-svg";
 import useSound from "../../../../../hooks/useSound";
-import EasyTwo from "./EasyTwo";
 
 const Easyone = () => {
   const { winSound, wrongAnswerSound } = useSound();
@@ -17,6 +16,14 @@ const Easyone = () => {
     "TUNISIA",
     "LIBYA",
   ];
+  const northAfricaRessources = {
+    'TUNISIA': {
+    },
+    'Moroco': {
+      
+    }
+  }
+
 
   useEffect(() => {
     if (isCompleted) {
@@ -60,10 +67,6 @@ const Easyone = () => {
       }, 500);
     }
   };
-
-  if (showNext) {
-    return <EasyTwo />;
-  }
 
   return (
     <View style={styles.container}>
