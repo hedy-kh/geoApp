@@ -19,6 +19,7 @@ import {
   RelationshipTypes,
 } from "../../utils/constants";
 import { useAuth } from "../../hooks/AuthContext";
+
 const SignupScreen = ({ navigation, route }) => {
   const { role } = route.params;
   const { signup } = useAuth();
@@ -45,7 +46,6 @@ const SignupScreen = ({ navigation, route }) => {
     school: "",
 
     relationship: "",
-    studentIds: "",
     studentsCount: "",
     address: "",
 
@@ -214,13 +214,13 @@ const SignupScreen = ({ navigation, route }) => {
           keyboardType: "numeric",
           required: true,
         },
+        // ✅ FIXED: Changed from studentIds to studentId
         {
-          key: "studentIds",
-          label: "أرقام الطلاب (اختياري)",
-          placeholder: "أرقام الطلاب مفصولة بفواصل",
-          icon: "account-child",
-          multiline: true,
-          required: false,
+          key: "studentId",
+          label: "رقم الطالب المرتبط",
+          placeholder: "أدخل رقم الطالب المرتبط بهذا الحساب",
+          icon: "identifier",
+          required: true,
         },
         {
           key: "address",
@@ -292,9 +292,10 @@ const SignupScreen = ({ navigation, route }) => {
         qualification: formData.qualification,
         school: formData.school,
       }),
+      // ✅ FIXED: Changed from studentIds to studentId
       ...(role === UserRoles.PARENT && {
         relationship: formData.relationship,
-        studentIds: formData.studentIds,
+        studentId: formData.studentId, // Changed from studentIds to studentId
         studentsCount: formData.studentsCount,
         address: formData.address,
       }),
@@ -387,7 +388,6 @@ const SignupScreen = ({ navigation, route }) => {
           >
             <Icon name="arrow-right" size={24} color="#4F46E5" />
           </TouchableOpacity>
-
           <Text style={styles.title}>إنشاء حساب {getRoleTitle()}</Text>
           <Text style={styles.subtitle}>
             {role === UserRoles.STUDENT
@@ -397,7 +397,6 @@ const SignupScreen = ({ navigation, route }) => {
               : "تابع مستوى أبنائك وتواصل مع المدرسة"}
           </Text>
         </View>
-
         <View style={styles.form}>
           {getRoleFields().map(renderField)}
 

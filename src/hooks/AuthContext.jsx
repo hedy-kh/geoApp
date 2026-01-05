@@ -65,6 +65,7 @@ export const AuthProvider = ({ children }) => {
           relationship: userData.relationship,
           studentsCount: userData.studentsCount,
           address: userData.address,
+          studentId: userData.studentId, // ✅ Add studentId for parent
         }),
         createdAt: new Date().toISOString(),
       });
@@ -76,14 +77,35 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
+  // ✅ Updated login function with role validation
+  const login = async (email, password, expectedRole) => {
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
         password
       );
-      return { success: true, user: userCredential.user };
+
+      // Fetch user data from Firestore to check role
+      const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+      const userData = userDoc.data();
+
+      // Validate that user's role matches the expected role
+      if (userData && userData.role !== expectedRole) {
+        // Sign out the user immediately
+        await signOut(auth);
+        return {
+          success: false,
+          error: "auth/wrong-role",
+          message: `هذا الحساب مسجل كـ ${getRoleNameInArabic(
+            userData.role
+          )}. الرجاء استخدام فضاء ${getRoleNameInArabic(
+            userData.role
+          )} لتسجيل الدخول.`,
+        };
+      }
+
+      return { success: true, user: userCredential.user, userData };
     } catch (error) {
       console.error("Login error:", error);
       return { success: false, error: error.message };
@@ -122,4 +144,17 @@ export const AuthProvider = ({ children }) => {
       {!loading && children}
     </AuthContext.Provider>
   );
+};
+
+const getRoleNameInArabic = (role) => {
+  switch (role) {
+    case "student":
+      return "تلميذ";
+    case "teacher":
+      return "معلم";
+    case "parent":
+      return "ولي أمر";
+    default:
+      return "مستخدم";
+  }
 };

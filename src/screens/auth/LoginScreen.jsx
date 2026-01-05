@@ -25,7 +25,7 @@ const LoginScreen = ({ navigation, route }) => {
     rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [loginMethod, setLoginMethod] = useState("email"); 
+  const [loginMethod, setLoginMethod] = useState("email");
   const handleLogin = async () => {
     if (!formData.email) {
       Alert.alert("خطأ", "الرجاء إدخال البريد الإلكتروني");
@@ -44,7 +44,9 @@ const LoginScreen = ({ navigation, route }) => {
 
     setLoading(true);
     try {
-      const result = await login(formData.email, formData.password);
+      // ✅ Pass the role parameter to login function
+      const result = await login(formData.email, formData.password, role);
+
       if (result.success) {
         console.log("Login successful");
         Alert.alert("تم الدخول بنجاح", `مرحباً بك في فضاء ${getRoleTitle()}`, [
@@ -54,7 +56,10 @@ const LoginScreen = ({ navigation, route }) => {
         let errorMessage = "حدث خطأ أثناء تسجيل الدخول";
 
         if (result.error) {
-          if (result.error.includes("auth/user-not-found")) {
+          // ✅ Handle role mismatch error
+          if (result.error === "auth/wrong-role") {
+            errorMessage = result.message;
+          } else if (result.error.includes("auth/user-not-found")) {
             errorMessage = "المستخدم غير موجود";
           } else if (result.error.includes("auth/wrong-password")) {
             errorMessage = "كلمة المرور غير صحيحة";
@@ -64,6 +69,8 @@ const LoginScreen = ({ navigation, route }) => {
             errorMessage = "تم محاولة الدخول مرات عديدة. حاول لاحقاً";
           } else if (result.error.includes("auth/user-disabled")) {
             errorMessage = "تم تعطيل هذا الحساب";
+          } else if (result.error.includes("auth/invalid-credential")) {
+            errorMessage = "البيانات المدخلة غير صحيحة";
           }
         }
 
