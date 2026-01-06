@@ -72,7 +72,6 @@ const ParentDashboard = ({ navigation }) => {
       try {
         setLoading(true);
 
-        // Query students collection where studentId matches parent's studentId
         const studentsRef = collection(db, "users");
         const q = query(
           studentsRef,
@@ -83,7 +82,6 @@ const ParentDashboard = ({ navigation }) => {
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
-          // Get the first matching student
           const studentDoc = querySnapshot.docs[0];
           const studentData = studentDoc.data();
 
@@ -128,7 +126,6 @@ const ParentDashboard = ({ navigation }) => {
     navigation.dispatch(DrawerActions.openDrawer());
   };
 
-  // Loading state
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -190,23 +187,23 @@ const ParentDashboard = ({ navigation }) => {
                 </View>
                 <View style={styles.studentInfoContent}>
                   <View style={styles.studentInfoRow}>
-                    <Text style={styles.studentInfoLabel}>الاسم:</Text>
                     <Text style={styles.studentInfoValue}>
                       {linkedStudent.fullName}
                     </Text>
+                    <Text style={styles.studentInfoLabel}>الاسم:</Text>
                   </View>
                   <View style={styles.studentInfoRow}>
-                    <Text style={styles.studentInfoLabel}>السنة الدراسية:</Text>
                     <Text style={styles.studentInfoValue}>
                       {linkedStudent.grade}
                     </Text>
+                    <Text style={styles.studentInfoLabel}>السنة الدراسية:</Text>
                   </View>
                   {linkedStudent.schoolName && (
                     <View style={styles.studentInfoRow}>
-                      <Text style={styles.studentInfoLabel}>المدرسة:</Text>
                       <Text style={styles.studentInfoValue}>
                         {linkedStudent.schoolName}
                       </Text>
+                      <Text style={styles.studentInfoLabel}>المدرسة:</Text>
                     </View>
                   )}
                 </View>
@@ -517,6 +514,7 @@ const styles = StyleSheet.create({
   },
   studentInfoCard: {
     width: "100%",
+    textAlign: "right",
     backgroundColor: "#F3F4F6",
     borderRadius: 12,
     padding: 16,
@@ -535,7 +533,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#374151",
-    marginRight: 8,
   },
   studentInfoContent: {
     gap: 8,
@@ -603,7 +600,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 10,
-    marginBottom:12,
+    marginBottom: 12,
     width: width * 0.6,
     ...Platform.select({
       ios: {

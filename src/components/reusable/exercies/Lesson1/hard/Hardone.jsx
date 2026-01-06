@@ -85,26 +85,11 @@ const Hardone = () => {
       return "ميشيل في تونس يريد السفر إلى موريتانيا. اكتشف المسار الصحيح واضغط على الدول بالترتيب الصحيح.";
     } else if (userPath.length > 1 && !isCompleted) {
       const lastCountry = userPath[userPath.length - 1];
-      return `ممتاز! أنت الآن في ${lastCountry}. أين تذهب بعد ذلك؟`;
+      return `ممتاز. أين تذهب بعد ذلك؟`;
     } else if (isCompleted) {
-      return "🎉 أحسنت! لقد اكتشفت المسار الصحيح: تونس→ الجزائر → المغرب → موريتانيا";
+      return "🎉 أحسنت! لقد اكتشفت المسار الصحيح: تونس -الجزائر - المغرب - موريتانيا";
     }
     return "ميشيل في تونس يريد السفر إلى موريتانيا. اكتشف المسار الصحيح.";
-  };
-
-  const getPathProgress = () => {
-    if (userPath.length === 1) {
-      return "المسار: بدأت الرحلة من تونس";
-    }
-
-    let progress = "المسار: ";
-    for (let i = 0; i < userPath.length; i++) {
-      progress += userPath[i];
-      if (i < userPath.length - 1) {
-        progress += " → ";
-      }
-    }
-    return progress;
   };
 
   if (showNext) {
@@ -115,7 +100,6 @@ const Hardone = () => {
     <View style={styles.container}>
       <Text style={styles.title}>تمرين الرحلة</Text>
       <Text style={styles.instruction}>{getInstructionText()}</Text>
-      <Text style={styles.pathText}>{getPathProgress()}</Text>
 
       
 
