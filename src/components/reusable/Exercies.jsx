@@ -3,6 +3,8 @@ import Easyone from "./exercies/Lesson1/Easy/Easyone";
 import Meduimone from "./exercies/Lesson1/meduim/Meduimone";
 import Hardone from "./exercies/Lesson1/hard/Hardone";
 import Easythree from "./exercies/Lesson2/Easy/Easythree";
+import MeduimThree from "./exercies/Lesson2/meduim/MeduimThree";
+import Hardthree from "./exercies/Lesson2/hard/Hardthree";
 const Exercies = ({ details, onClose }) => {
   const { lessonId, unitId, level } = details;
   const displayid = () => {
@@ -44,6 +46,8 @@ const Exercies = ({ details, onClose }) => {
             {lessonId === 'lesson-1' && level == "MEDIUM" ? <Meduimone /> : null}
             {lessonId == 'lesson-1' && level == "HARD" ? <Hardone /> : null}
             {lessonId =='lesson-2' && level == "EASY"? <Easythree/>:null}
+            {lessonId == 'lesson-2' && level == "MEDIUM" ? <MeduimThree /> : null}
+            {lessonId == 'lesson-2' && level=='HARD' ? <Hardthree/>:null}
 
           </View>
         </View>
