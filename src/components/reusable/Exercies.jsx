@@ -24,7 +24,6 @@ const Exercies = ({ details, onClose }) => {
         <View style={styles.modalContainer}>
           {/* Header with Close Button */}
           <View style={styles.header}>
-            <Text style={styles.title}>Exercise Screen</Text>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={onClose}
@@ -32,6 +31,7 @@ const Exercies = ({ details, onClose }) => {
             >
               <Text style={styles.closeButtonText}>✕</Text>
             </TouchableOpacity>
+            <Text style={styles.title}>تمارين المحور </Text>
           </View>
 
           {/* Info Section */}
@@ -43,12 +43,15 @@ const Exercies = ({ details, onClose }) => {
           {/* Exercise Content */}
           <View style={styles.contentContainer}>
             {lessonId === "lesson-1" && level === "EASY" ? <Easyone /> : null}
-            {lessonId === 'lesson-1' && level == "MEDIUM" ? <Meduimone /> : null}
-            {lessonId == 'lesson-1' && level == "HARD" ? <Hardone /> : null}
-            {lessonId =='lesson-2' && level == "EASY"? <Easythree/>:null}
-            {lessonId == 'lesson-2' && level == "MEDIUM" ? <MeduimThree /> : null}
-            {lessonId == 'lesson-2' && level=='HARD' ? <Hardthree/>:null}
-
+            {lessonId === "lesson-1" && level == "MEDIUM" ? (
+              <Meduimone />
+            ) : null}
+            {lessonId == "lesson-1" && level == "HARD" ? <Hardone /> : null}
+            {lessonId == "lesson-2" && level == "EASY" ? <Easythree /> : null}
+            {lessonId == "lesson-2" && level == "MEDIUM" ? (
+              <MeduimThree />
+            ) : null}
+            {lessonId == "lesson-2" && level == "HARD" ? <Hardthree /> : null}
           </View>
         </View>
       </View>

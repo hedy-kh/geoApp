@@ -28,10 +28,7 @@ const quizz = [
 ];
 
 const HardFive = () => {
-  const { winSound, wrongAnswerSound, arabicSound } = useSound();
-
-  // Add debug logs
-  console.log("Sound functions:", { winSound, wrongAnswerSound, arabicSound });
+  const {  wrongAnswerSound, arabicSound } = useSound();
 
   const [selected, setSelected] = useState([]);
   const [showCompletion, setShowCompletion] = useState(false);
@@ -64,7 +61,6 @@ const HardFive = () => {
     // Play sound BEFORE updating state
     if (item.correct) {
       console.log("Calling winSound");
-      winSound();
     } else {
       console.log("Calling wrongAnswerSound");
       wrongAnswerSound();

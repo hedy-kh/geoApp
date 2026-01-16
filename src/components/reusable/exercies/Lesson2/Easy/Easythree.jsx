@@ -11,8 +11,6 @@ import { useEffect, useState, useRef } from "react";
 import EasyFour from "./EasyFour";
 import useSound from "../../../../../hooks/useSound";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
 const correctZones = {
   جبال: "north",
   هضاب: "middle",
@@ -30,14 +28,11 @@ const DraggableItem = ({ label, onDrop }) => {
 
   const responder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
-
     onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
       useNativeDriver: false,
     }),
-
     onPanResponderRelease: (_, gesture) => {
       onDrop(label, gesture.moveY);
-
       Animated.spring(pan, {
         toValue: { x: 0, y: 0 },
         useNativeDriver: false,
@@ -47,8 +42,8 @@ const DraggableItem = ({ label, onDrop }) => {
 
   return (
     <Animated.View
+      style={[styles.dragItem, { transform: pan.getTranslateTransform() }]}
       {...responder.panHandlers}
-      style={[styles.dragItem, pan.getLayout()]}
     >
       <Text style={styles.dragText}>{label}</Text>
     </Animated.View>
@@ -57,55 +52,75 @@ const DraggableItem = ({ label, onDrop }) => {
 
 const Easythree = () => {
   const { winSound, correctAnswerSound, wrongAnswerSound } = useSound();
-
-  const mapRef = useRef(null);
-  const mapMetrics = useRef(null); // FIX
+  const { width: SCREEN_WIDTH } = Dimensions.get("window");
+  const imageRef = useRef(null);
+  const imageMetrics = useRef(null);
 
   const [placed, setPlaced] = useState({
     north: null,
     middle: null,
     south: null,
   });
-
   const [message, setMessage] = useState("");
   const [showNext, setShowNext] = useState(false);
 
   const terrain = ["جبال", "هضاب", "صحراء"];
   const hint = "فكر في موقع البحر والصحراء";
 
-  // FIX: measure map in SCREEN coordinates
-  const measureMap = () => {
-    if (!mapRef.current) return;
-
-    mapRef.current.measureInWindow((x, y, width, height) => {
-      mapMetrics.current = { y, height };
+  const measureImage = () => {
+    if (!imageRef.current) return;
+    imageRef.current.measureInWindow((x, y, width, height) => {
+      imageMetrics.current = { y, height };
+      console.log("Image metrics:", { y, height }); // Debug log
     });
   };
 
   const handleDrop = (label, absoluteY) => {
-    if (!mapMetrics.current) return;
+    if (!imageMetrics.current) return;
 
-    const { y, height } = mapMetrics.current;
+    const { y, height } = imageMetrics.current;
     const relativeY = absoluteY - y;
 
-    // STRICT bounds check
+    console.log("Drop:", { label, absoluteY, imageY: y, relativeY, height }); // Debug log
+
     if (relativeY < 0 || relativeY > height) {
       setMessage("⬅️ ضع العنصر داخل الخريطة");
       return;
     }
 
-    const zoneHeight = height / 3;
+    // Calculate relative position as percentage (0 to 1)
+    const relativePosition = relativeY / height;
+
     let droppedZone;
 
-    if (relativeY < zoneHeight) droppedZone = "north";
-    else if (relativeY < zoneHeight * 2) droppedZone = "middle";
-    else droppedZone = "south";
+    if (relativePosition < 0.25) {
+      droppedZone = "north";
+    } else if (relativePosition > 0.6) {
+      droppedZone = "south";
+    } else {
+      droppedZone = "middle";
+    }
 
-    if (placed[droppedZone]) return;
+    console.log(
+      "Detected zone:",
+      droppedZone,
+      "for",
+      label,
+      "position:",
+      relativePosition
+    );
+
+    if (placed[droppedZone]) {
+      setMessage("⚠️ هذه المنطقة ممتلئة بالفعل");
+      return;
+    }
 
     if (correctZones[label] === droppedZone) {
       correctAnswerSound();
-      setPlaced((prev) => ({ ...prev, [droppedZone]: label }));
+      setPlaced((prev) => ({
+        ...prev,
+        [droppedZone]: label,
+      }));
       setMessage("⭐ صحيح!");
     } else {
       wrongAnswerSound();
@@ -132,30 +147,30 @@ const Easythree = () => {
       </Text>
 
       {/* MAP */}
-      <View
-        ref={mapRef}
-        style={styles.mapContainer}
-        onLayout={measureMap} // FIX
-      >
+      <View style={styles.mapContainer}>
         <Image
+          ref={imageRef}
           source={require("../../../../../../assets/images/maghreb.png")}
           style={styles.map}
+          onLayout={measureImage}
         />
 
         {placed.north && (
-          <Text style={[styles.icon, styles.north]}>
-            {terrainIcons[placed.north]}
-          </Text>
+          <View style={[styles.iconContainer, styles.north]}>
+            <Text style={styles.icon}>{terrainIcons[placed.north]}</Text>
+          </View>
         )}
+
         {placed.middle && (
-          <Text style={[styles.icon, styles.middle]}>
-            {terrainIcons[placed.middle]}
-          </Text>
+          <View style={[styles.iconContainer, styles.middle]}>
+            <Text style={styles.icon}>{terrainIcons[placed.middle]}</Text>
+          </View>
         )}
+
         {placed.south && (
-          <Text style={[styles.icon, styles.south]}>
-            {terrainIcons[placed.south]}
-          </Text>
+          <View style={[styles.iconContainer, styles.south]}>
+            <Text style={styles.icon}>{terrainIcons[placed.south]}</Text>
+          </View>
         )}
       </View>
 
@@ -180,55 +195,61 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
   },
-
   title: {
     fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
     marginVertical: 10,
   },
-
   mapContainer: {
     width: "100%",
-    aspectRatio: 1.25, // BIGGER IMAGE
+    aspectRatio: 1.18,
     position: "relative",
+    height: "50%",
   },
-
   map: {
     width: "100%",
     height: "100%",
     resizeMode: "contain",
   },
-
-  icon: {
+  iconContainer: {
     position: "absolute",
-    fontSize: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 20,
+    padding: 4,
+    borderWidth: 2,
+    borderColor: "#4CAF50",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-
-  // YOUR OFFSET REQUEST (kept)
+  icon: {
+    fontSize: 20,
+  },
   north: {
-    top: 10,
-    left: "22%",
+    top: 30,
+    left: "42%",
     transform: [{ translateX: -4 }, { translateY: 8 }],
   },
-
   middle: {
-    top: "45%",
-    left: "45%",
+    top: "30%", // Moved higher from 45%
+    left: "50%", // Moved more to the right from 45%
     transform: [{ translateX: 2 }, { translateY: 0 }],
   },
-
   south: {
-    bottom: 10,
+    bottom: "25%", // Moved higher from bottom: 10
     left: "55%",
     transform: [{ translateX: 4 }, { translateY: -5 }],
   },
-
   dragContainer: {
     flexDirection: "row",
     marginTop: 12,
   },
-
   dragItem: {
     backgroundColor: "#f1f1f1",
     paddingVertical: 12,
@@ -237,19 +258,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 6,
     elevation: 3,
   },
-
   dragText: {
     fontSize: 18,
     fontWeight: "bold",
   },
-
   subtitle: {
     marginTop: 8,
     fontSize: 16,
     color: "#666",
     textAlign: "center",
   },
-
   successText: {
     marginTop: 10,
     fontSize: 20,
@@ -257,6 +275,5 @@ const styles = StyleSheet.create({
     color: "#4CAF50",
   },
 });
-
 
 export default Easythree;

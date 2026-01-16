@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,16 +8,16 @@ import {
   Animated,
   ScrollView,
   Platform,
-  PanResponder
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+  PanResponder,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 const OnboardingScreen = ({ navigation }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const scrollViewRef = useRef(null);
-  
+
   // Multiple animation values
   const iconFadeAnim = useRef(new Animated.Value(0)).current;
   const iconScaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -28,31 +28,34 @@ const OnboardingScreen = ({ navigation }) => {
   const onboardingData = [
     {
       id: 1,
-      title: 'جغرافي',
-      description: 'حوّل كتاب الجغرافيا الممل إلى تجربة تفاعلية مذهلة عبر تقنيات الذكاء الاصطناعي والواقع المعزز.',
-      icon: '🌍',
-      color: '#4F46E5',
-      bgColor: '#EEF2FF',
-      iconAnimation: 'rotate'
+      title: "جغرافي",
+      description:
+        "حوّل كتاب الجغرافيا الممل إلى تجربة تفاعلية مذهلة عبر تقنيات الذكاء الاصطناعي والواقع المعزز.",
+      icon: "🌍",
+      color: "#4F46E5",
+      bgColor: "#EEF2FF",
+      iconAnimation: "rotate",
     },
     {
       id: 2,
-      title: 'تعلم بالذكاء الاصطناعي',
-      description: 'محادثات ذكية مع مساعد جغرافي يفهم أسئلتك ويشرح المفاصل بطريقة سهلة وممتعة.',
-      icon: '🤖',
-      color: '#059669',
-      bgColor: '#D1FAE5',
-      iconAnimation: 'bounce'
+      title: "تعلم بالذكاء الاصطناعي",
+      description:
+        "محادثات ذكية مع مساعد جغرافي يفهم أسئلتك ويشرح المفاصل بطريقة سهلة وممتعة.",
+      icon: "🤖",
+      color: "#059669",
+      bgColor: "#D1FAE5",
+      iconAnimation: "bounce",
     },
     {
       id: 3,
-      title: 'خرائط تفاعلية',
-      description: 'استكشف العالم عبر خرائط ثلاثية الأبعاد وتحديات الواقع المعزز التي تجعل التعلم مغامرة.',
-      icon: '🗺️',
-      color: '#DC2626',
-      bgColor: '#FEE2E2',
-      iconAnimation: 'pulse'
-    }
+      title: "خرائط تفاعلية",
+      description:
+        "استكشف العالم عبر خرائط ثلاثية الأبعاد وتحديات الواقع المعزز التي تجعل التعلم مغامرة.",
+      icon: "🗺️",
+      color: "#DC2626",
+      bgColor: "#FEE2E2",
+      iconAnimation: "pulse",
+    },
   ];
 
   // PanResponder for swipe gestures
@@ -63,7 +66,7 @@ const OnboardingScreen = ({ navigation }) => {
       onPanResponderRelease: (evt, gestureState) => {
         const { dx } = gestureState;
         const swipeThreshold = 50;
-        
+
         if (Math.abs(dx) > swipeThreshold) {
           if (dx > 0 && currentPage > 0) {
             // Swipe right - go to previous page
@@ -73,14 +76,14 @@ const OnboardingScreen = ({ navigation }) => {
             handleScroll(currentPage + 1);
           }
         }
-      }
+      },
     })
   ).current;
 
   const handleScroll = (pageIndex) => {
     scrollViewRef.current.scrollTo({
       x: width * pageIndex,
-      animated: true
+      animated: true,
     });
     setCurrentPage(pageIndex);
   };
@@ -93,10 +96,12 @@ const OnboardingScreen = ({ navigation }) => {
 
   const handleSkip = () => {
     handleScroll(onboardingData.length - 1);
+    console.log("handle skip");
   };
 
   const handleGetStarted = () => {
-    navigation.navigate('RoleSelection');
+    navigation.navigate("RoleSelection");
+    console.log("clicked");
   };
 
   const animatePage = () => {
@@ -108,10 +113,10 @@ const OnboardingScreen = ({ navigation }) => {
     descriptionFadeAnim.setValue(0);
 
     const currentData = onboardingData[currentPage];
-    
+
     // Icon animations based on type
     let iconAnimation;
-    if (currentData.iconAnimation === 'rotate') {
+    if (currentData.iconAnimation === "rotate") {
       iconAnimation = Animated.sequence([
         Animated.timing(iconRotateAnim, {
           toValue: 1,
@@ -122,9 +127,9 @@ const OnboardingScreen = ({ navigation }) => {
           toValue: 0,
           duration: 1500,
           useNativeDriver: true,
-        })
+        }),
       ]);
-    } else if (currentData.iconAnimation === 'bounce') {
+    } else if (currentData.iconAnimation === "bounce") {
       iconAnimation = Animated.sequence([
         Animated.spring(iconScaleAnim, {
           toValue: 1.2,
@@ -137,7 +142,7 @@ const OnboardingScreen = ({ navigation }) => {
           friction: 3,
           tension: 40,
           useNativeDriver: true,
-        })
+        }),
       ]);
     } else {
       // Pulse animation
@@ -152,7 +157,7 @@ const OnboardingScreen = ({ navigation }) => {
             toValue: 1,
             duration: 500,
             useNativeDriver: true,
-          })
+          }),
         ])
       );
     }
@@ -175,7 +180,7 @@ const OnboardingScreen = ({ navigation }) => {
         duration: 800,
         delay: 300,
         useNativeDriver: true,
-      })
+      }),
     ]).start();
   };
 
@@ -186,53 +191,58 @@ const OnboardingScreen = ({ navigation }) => {
   const renderPage = (item, index) => {
     const rotateInterpolate = iconRotateAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: ['0deg', '360deg']
+      outputRange: ["0deg", "360deg"],
     });
 
     const slideInterpolate = titleSlideAnim.interpolate({
       inputRange: [0, 50],
-      outputRange: [0, 50]
+      outputRange: [0, 50],
     });
 
     return (
       <View key={item.id} style={[styles.page, { width }]}>
         <View style={[styles.iconContainer, { backgroundColor: item.bgColor }]}>
-          <Animated.Text 
+          <Animated.Text
             style={[
               styles.icon,
               {
                 opacity: iconFadeAnim,
                 transform: [
                   { scale: iconScaleAnim },
-                  { rotate: item.iconAnimation === 'rotate' ? rotateInterpolate : '0deg' }
-                ]
-              }
+                  {
+                    rotate:
+                      item.iconAnimation === "rotate"
+                        ? rotateInterpolate
+                        : "0deg",
+                  },
+                ],
+              },
             ]}
           >
             {item.icon}
           </Animated.Text>
         </View>
-        
+
         <View style={styles.content}>
-          <Animated.Text 
+          <Animated.Text
             style={[
-              styles.title, 
+              styles.title,
               { color: item.color },
               {
                 transform: [{ translateY: slideInterpolate }],
-                opacity: iconFadeAnim
-              }
+                opacity: iconFadeAnim,
+              },
             ]}
           >
             {item.title}
           </Animated.Text>
-          
-          <Animated.Text 
+
+          <Animated.Text
             style={[
               styles.description,
               {
-                opacity: descriptionFadeAnim
-              }
+                opacity: descriptionFadeAnim,
+              },
             ]}
           >
             {item.description}
@@ -240,7 +250,7 @@ const OnboardingScreen = ({ navigation }) => {
         </View>
 
         {index === onboardingData.length - 1 && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.getStartedButton, { backgroundColor: item.color }]}
             onPress={handleGetStarted}
           >
@@ -254,15 +264,14 @@ const OnboardingScreen = ({ navigation }) => {
   const renderDots = () => (
     <View style={styles.dotsContainer}>
       {onboardingData.map((_, index) => (
-        <TouchableOpacity
-          key={index}
-          onPress={() => handleScroll(index)}
-        >
+        <TouchableOpacity key={index} onPress={() => handleScroll(index)}>
           <View
             style={[
               styles.dot,
               currentPage === index && styles.activeDot,
-              currentPage === index && { backgroundColor: onboardingData[index].color }
+              currentPage === index && {
+                backgroundColor: onboardingData[index].color,
+              },
             ]}
           />
         </TouchableOpacity>
@@ -292,18 +301,21 @@ const OnboardingScreen = ({ navigation }) => {
 
       <View style={styles.footer}>
         {renderDots()}
-        
+
         <View style={styles.buttonContainer}>
           <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
             <Text style={styles.skipText}>تخطي</Text>
           </TouchableOpacity>
-          
+
           {currentPage < onboardingData.length - 1 && (
-            <TouchableOpacity 
-              onPress={handleNext} 
-              style={[styles.nextButton, { 
-                backgroundColor: onboardingData[currentPage].color 
-              }]}
+            <TouchableOpacity
+              onPress={handleNext}
+              style={[
+                styles.nextButton,
+                {
+                  backgroundColor: onboardingData[currentPage].color,
+                },
+              ]}
             >
               <Text style={styles.nextText}>التالي </Text>
             </TouchableOpacity>
@@ -317,27 +329,27 @@ const OnboardingScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   scrollView: {
     flex: 1,
   },
   page: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 30,
   },
   iconContainer: {
     width: 200,
     height: 200,
     borderRadius: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 40,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
         shadowRadius: 12,
@@ -351,34 +363,34 @@ const styles = StyleSheet.create({
     fontSize: 80,
   },
   content: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
     fontSize: 36,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginBottom: 20,
-    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
   },
   description: {
     fontSize: 18,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 28,
-    color: '#4B5563',
+    color: "#4B5563",
     paddingHorizontal: 20,
-    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+    fontFamily: Platform.OS === "ios" ? "System" : "Roboto",
   },
   dotsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 30,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#D1D5DB',
+    backgroundColor: "#D1D5DB",
     marginHorizontal: 4,
   },
   activeDot: {
@@ -389,9 +401,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   skipButton: {
     paddingVertical: 12,
@@ -399,8 +411,8 @@ const styles = StyleSheet.create({
   },
   skipText: {
     fontSize: 16,
-    color: '#6B7280',
-    fontWeight: '500',
+    color: "#6B7280",
+    fontWeight: "500",
   },
   nextButton: {
     paddingVertical: 12,
@@ -408,7 +420,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 4,
@@ -420,18 +432,18 @@ const styles = StyleSheet.create({
   },
   nextText: {
     fontSize: 16,
-    color: '#FFFFFF',
-    fontWeight: '600',
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
   getStartedButton: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: "#4F46E5",
     paddingVertical: 16,
     paddingHorizontal: 48,
     borderRadius: 16,
     marginTop: 40,
     ...Platform.select({
       ios: {
-        shadowColor: '#4F46E5',
+        shadowColor: "#4F46E5",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
@@ -443,8 +455,8 @@ const styles = StyleSheet.create({
   },
   getStartedText: {
     fontSize: 18,
-    color: '#FFFFFF',
-    fontWeight: 'bold',
+    color: "#FFFFFF",
+    fontWeight: "bold",
   },
 });
 

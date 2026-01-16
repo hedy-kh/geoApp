@@ -171,17 +171,7 @@ const TeacherDrawerNavigator = () => {
           ),
         }}
       />
-      <Drawer.Screen 
-        name="Settings" 
-        component={SettingsScreen}
-        options={{
-          drawerLabel: 'الإعدادات',
-          title: 'الإعدادات',
-          drawerIcon: ({ color, size }) => (
-            <Icon name="cog" size={size} color={color} />
-          ),
-        }}
-      />
+     
       <Drawer.Screen 
         name="Logout" 
         component={LogoutScreen}
@@ -225,16 +215,7 @@ const ParentDrawerNavigator = () => {
           ),
         }}
       />
-      <Drawer.Screen
-        name="ChildProgress"
-        component={ChildProgressScreen}
-        options={{
-          drawerLabel: 'تقدم الأبناء',
-          drawerIcon: ({ color, size }) => (
-            <Icon name="school" size={size} color={color} />
-          ),
-        }}
-      />
+     
       <Drawer.Screen
         name="Communications"
         component={CommunicationsScreen}
