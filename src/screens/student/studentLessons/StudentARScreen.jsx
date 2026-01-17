@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   ViroARSceneNavigator,
   ViroARScene,
@@ -6,58 +6,58 @@ import {
   ViroDirectionalLight,
   Viro3DObject,
   ViroNode,
-  ViroARPlaneSelector,
   ViroAmbientLight,
-  ViroBox,
 } from "@reactvision/react-viro";
 import { StyleSheet } from "react-native";
 
-/* COUNTRY ANCHORS (relative to the placed model) */
-const COUNTRY_POINTS = {
-  Tunisia: [0.2, 0.02, 0],
-  Algeria: [0.0, 0.02, 0],
-  Libya: [0.35, 0.02, 0],
-  Morocco: [-0.25, 0.02, 0],
-  Mauritania: [-0.4, 0.02, 0],
-};
-
 const ARScene = (props) => {
   const { arView } = props.sceneNavigator.viroAppProps;
-  const [travelerPos, setTravelerPos] = useState(COUNTRY_POINTS.Tunisia);
-  const [planeFound, setPlaneFound] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [characterLoaded, setCharacterLoaded] = useState(false);
+  const worldmap = '../../../../assets/3d/worldmap.glb';
+  
+  // Use refs for position/rotation to avoid re-renders
+  const mapPosition = useRef([0, 0, -2]); // 2 meters in front of camera
+  const mapRotation = useRef([-15, 0, 0]); // Slightly tilted forward for better viewing
+  const mapScale = useRef([0.7, 0.7, 0.7]); // Initial scale
 
   // Debug handlers
   const handleMapLoadStart = () => {
-    console.log("🗺️ Map model loading...");
+    console.log("🗺️ جاري تحميل خريطة أفريقيا...");
   };
 
   const handleMapLoadEnd = () => {
-    console.log("✅ Map model loaded successfully!");
+    console.log("✅ تم تحميل الخريطة بنجاح!");
     setMapLoaded(true);
   };
 
   const handleMapError = (error) => {
-    console.error("❌ Map model error:", error);
+    console.error("❌ خطأ في تحميل الخريطة:", error);
   };
 
-  const handleCharacterLoadStart = () => {
-    console.log("🚶 Character model loading...");
+  const handleMapDrag = (position, source) => {
+    console.log("🗺️ تم نقل الخريطة إلى:", position);
+    mapPosition.current = position;
   };
 
-  const handleCharacterLoadEnd = () => {
-    console.log("✅ Character model loaded successfully!");
-    setCharacterLoaded(true);
+  const handleMapRotate = (rotation, source) => {
+    console.log("🔄 تم تدوير الخريطة:", rotation);
+    // Ensure rotation values are valid
+    if (
+      rotation &&
+      Array.isArray(rotation) &&
+      rotation.length === 3 &&
+      rotation.every((val) => !isNaN(val))
+    ) {
+      mapRotation.current = rotation;
+    }
   };
 
-  const handleCharacterError = (error) => {
-    console.error("❌ Character model error:", error);
-  };
-
-  const handleCountryTap = (countryName) => {
-    console.log(`📍 Tapped on ${countryName}`);
-    setTravelerPos(COUNTRY_POINTS[countryName]);
+  const handleMapPinch = (scale, source) => {
+    console.log("🔍 تم تغيير حجم الخريطة:", scale);
+    if (scale && Array.isArray(scale) && scale.length === 3) {
+      // Apply the pinch scale to the base scale
+      mapScale.current = [0.7 * scale[0], 0.7 * scale[1], 0.7 * scale[2]];
+    }
   };
 
   return (
@@ -70,123 +70,63 @@ const ARScene = (props) => {
         intensity={300}
       />
 
-      {/* Floating title */}
+      {/* Floating title in Arabic */}
       <ViroText
-        text={arView?.name || "Scan a surface to place the map"}
-        position={[0, 0.5, -1.5]}
-        scale={[1, 1, 1]}
+        text={arView?.name || "خريطة أفريقيا التفاعلية"}
+        position={[0, 1, -3]}
+        scale={[0.8, 0.8, 0.8]}
         style={styles.titleText}
       />
 
-      {/* Instructions before plane is found */}
-      {!planeFound && (
-        <ViroText
-          text="Move your phone slowly to detect a surface..."
-          position={[0, 0.3, -1.5]}
-          scale={[1, 1, 1]}
-          style={styles.instructionText}
-        />
-      )}
-
       {/* Loading status */}
-      {planeFound && (!mapLoaded || !characterLoaded) && (
+      {!mapLoaded && (
         <ViroText
-          text="Loading 3D models..."
-          position={[0, 0.2, -1.5]}
-          scale={[1, 1, 1]}
+          text="جاري تحميل الخريطة ثلاثية الأبعاد..."
+          position={[0, 0, -2]}
+          scale={[0.7, 0.7, 0.7]}
           style={styles.loadingText}
         />
       )}
 
-      {/* AR Plane Selector - places content on detected surface */}
-      <ViroARPlaneSelector
-        minHeight={0.3}
-        minWidth={0.3}
-        alignment="Horizontal"
-        onPlaneSelected={() => {
-          console.log("✅ Plane detected and selected!");
-          setPlaneFound(true);
-        }}
+      {/* Instructions */}
+      <ViroText
+        text="يمكنك سحب، تدوير، وتكبير/تصغير الخريطة"
+        position={[0, 0.5, -3]}
+        scale={[0.6, 0.6, 0.6]}
+        style={styles.instructionText}
+      />
+
+      {/* Map container with drag, rotate, and pinch capabilities */}
+      <ViroNode
+        position={mapPosition.current}
+        rotation={mapRotation.current}
+        scale={mapScale.current}
+        dragType="FixedToWorld"
+        onDrag={handleMapDrag}
+        onRotate={handleMapRotate}
+        onPinch={handleMapPinch}
       >
-        <ViroNode position={[0, 0, 0]}>
-          {/* ============ AFRICA MAP 3D MODEL ============ */}
-          {/* ============ AFRICA MAP 3D MODEL ============ */}
-          <Viro3DObject
-            source={require("../../../../assets/3d/africa_3d_map.glb")}
-            type="GLB"
-            scale={[0.5, 0.5, 0.5]}
-            position={[0, 0, 0]}
-            rotation={[0, 0, 0]}
-            onLoadStart={handleMapLoadStart}
-            onLoadEnd={handleMapLoadEnd}
-            onError={handleMapError}
-          />
-
-          {/* DEBUG: Add a visible box behind the map */}
-          <ViroBox
-            position={[0, 0.05, 0]}
-            scale={[0.5, 0.01, 0.5]}
-            materials={["blue"]}
-          />
-
-          {/* ============ COUNTRY INTERACTION POINTS ============ */}
-          {Object.entries(COUNTRY_POINTS).map(([name, pos]) => (
-            <ViroNode
-              key={name}
-              position={pos}
-              onClick={() => handleCountryTap(name)}
-            >
-              {/* Country label */}
-              <ViroText
-                text={name}
-                position={[0, 0.1, 0]}
-                scale={[1, 1, 1]}
-                style={styles.countryLabel}
-              />
-
-              {/* Interactive marker (shows where to tap) */}
-              <ViroBox
-                position={[0, 0.05, 0]}
-                scale={[0.03, 0.02, 0.03]}
-                materials={["green"]}
-              />
-            </ViroNode>
-          ))}
-
-          {/* ============ CHARACTER 3D MODEL ============ */}
-          <Viro3DObject
-            source={require("../../../../assets/3d/charachter_model.glb")}
-            type="GLB"
-            scale={[0.08, 0.08, 0.08]}
-            position={travelerPos}
-            rotation={[0, 0, 0]}
-            onLoadStart={handleCharacterLoadStart}
-            onLoadEnd={handleCharacterLoadEnd}
-            onError={handleCharacterError}
-            animation={{
-              name: "idle",
-              run: true,
-              loop: true,
-            }}
-          />
-
-          {/* Character fallback indicator */}
-          {/* <ViroBox
-            position={travelerPos}
-            scale={[0.05, 0.1, 0.05]}
-            materials={["red"]}
-          /> */}
-        </ViroNode>
-      </ViroARPlaneSelector>
+        {/* ============ AFRICA MAP 3D MODEL ============ */}
+        <Viro3DObject
+          source={require("../../../../assets/3d/africa_3d_map.glb")}
+          type="GLB"
+          scale={[1, 1, 1]}
+          position={[0, 0, 0]}
+          rotation={[0, 0, 0]}
+          onLoadStart={handleMapLoadStart}
+          onLoadEnd={handleMapLoadEnd}
+          onError={handleMapError}
+        />
+      </ViroNode>
     </ViroARScene>
   );
 };
 
-// Styles for ViroText
+// Styles
 const styles = StyleSheet.create({
   titleText: {
     fontFamily: "Arial",
-    fontSize: 28,
+    fontSize: 24,
     color: "#ffffff",
     textAlignVertical: "center",
     textAlign: "center",
@@ -194,7 +134,7 @@ const styles = StyleSheet.create({
   },
   instructionText: {
     fontFamily: "Arial",
-    fontSize: 20,
+    fontSize: 16,
     color: "#ffcc00",
     textAlignVertical: "center",
     textAlign: "center",
@@ -205,14 +145,6 @@ const styles = StyleSheet.create({
     color: "#00ffff",
     textAlignVertical: "center",
     textAlign: "center",
-  },
-  countryLabel: {
-    fontFamily: "Arial",
-    fontSize: 16,
-    color: "#00ff00",
-    textAlignVertical: "center",
-    textAlign: "center",
-    fontWeight: "bold",
   },
 });
 
