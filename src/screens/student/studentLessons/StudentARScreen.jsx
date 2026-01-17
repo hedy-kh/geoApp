@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   ViroARSceneNavigator,
   ViroARScene,
@@ -8,156 +8,208 @@ import {
   ViroNode,
   ViroAmbientLight,
 } from "@reactvision/react-viro";
-import { StyleSheet } from "react-native";
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 
+/* ============ AR SCENE (CLEAN + STABLE + ZOOM BUTTONS) ============ */
 const ARScene = (props) => {
-  const { arView } = props.sceneNavigator.viroAppProps;
+  const { selectedModel } = props.sceneNavigator.viroAppProps;
   const [mapLoaded, setMapLoaded] = useState(false);
-  const worldmap = '../../../../assets/3d/worldmap.glb';
-  
-  // Use refs for position/rotation to avoid re-renders
-  const mapPosition = useRef([0, 0, -2]); // 2 meters in front of camera
-  const mapRotation = useRef([-15, 0, 0]); // Slightly tilted forward for better viewing
-  const mapScale = useRef([0.7, 0.7, 0.7]); // Initial scale
 
-  // Debug handlers
-  const handleMapLoadStart = () => {
-    console.log("🗺️ جاري تحميل خريطة أفريقيا...");
+  const [position, setPosition] = useState([0, -0.3, -2]);
+  const [rotation, setRotation] = useState([0, 0, 0]);
+  const [scale, setScale] = useState([0.7, 0.7, 0.7]);
+
+  const clampRotation = (rot) => {
+    if (!Array.isArray(rot) || rot.length !== 3) return rotation;
+    return [Math.max(-45, Math.min(45, rot[0])), rot[1] || 0, 0];
   };
 
-  const handleMapLoadEnd = () => {
-    console.log("✅ تم تحميل الخريطة بنجاح!");
-    setMapLoaded(true);
+  const safeScale = (s) => {
+    if (!Array.isArray(s) || s.length !== 3) return scale;
+    const newScale = 0.7 * s[0];
+    return [
+      Math.max(0.3, Math.min(1.5, newScale)),
+      Math.max(0.3, Math.min(1.5, newScale)),
+      Math.max(0.3, Math.min(1.5, newScale)),
+    ];
   };
 
-  const handleMapError = (error) => {
-    console.error("❌ خطأ في تحميل الخريطة:", error);
+  // ======= NEW ZOOM FUNCTIONS (SAFE) =======
+  const zoomIn = () => {
+    const newScale = Math.min(1.5, scale[0] * 1.2);
+    setScale([newScale, newScale, newScale]);
   };
 
-  const handleMapDrag = (position, source) => {
-    console.log("🗺️ تم نقل الخريطة إلى:", position);
-    mapPosition.current = position;
-  };
-
-  const handleMapRotate = (rotation, source) => {
-    console.log("🔄 تم تدوير الخريطة:", rotation);
-    // Ensure rotation values are valid
-    if (
-      rotation &&
-      Array.isArray(rotation) &&
-      rotation.length === 3 &&
-      rotation.every((val) => !isNaN(val))
-    ) {
-      mapRotation.current = rotation;
-    }
-  };
-
-  const handleMapPinch = (scale, source) => {
-    console.log("🔍 تم تغيير حجم الخريطة:", scale);
-    if (scale && Array.isArray(scale) && scale.length === 3) {
-      // Apply the pinch scale to the base scale
-      mapScale.current = [0.7 * scale[0], 0.7 * scale[1], 0.7 * scale[2]];
-    }
+  const zoomOut = () => {
+    const newScale = Math.max(0.3, scale[0] * 0.8);
+    setScale([newScale, newScale, newScale]);
   };
 
   return (
     <ViroARScene>
-      {/* Lighting setup */}
       <ViroAmbientLight color="#ffffff" intensity={400} />
-      <ViroDirectionalLight
-        direction={[0, -1, -0.5]}
-        color="#ffffff"
-        intensity={300}
-      />
+      <ViroDirectionalLight direction={[0, -1, -0.5]} intensity={300} />
 
-      {/* Floating title in Arabic */}
+      {/* SIMPLE ENGLISH LABEL ONLY */}
       <ViroText
-        text={arView?.name || "خريطة أفريقيا التفاعلية"}
-        position={[0, 1, -3]}
+        text="GeoKids"
+        position={[0, 1.2, -3]}
         scale={[0.8, 0.8, 0.8]}
-        style={styles.titleText}
+        style={styles.arText}
       />
 
-      {/* Loading status */}
-      {!mapLoaded && (
-        <ViroText
-          text="جاري تحميل الخريطة ثلاثية الأبعاد..."
-          position={[0, 0, -2]}
-          scale={[0.7, 0.7, 0.7]}
-          style={styles.loadingText}
-        />
-      )}
-
-      {/* Instructions */}
+      {/* ======= ZOOM BUTTONS INSIDE AR ======= */}
       <ViroText
-        text="يمكنك سحب، تدوير، وتكبير/تصغير الخريطة"
-        position={[0, 0.5, -3]}
-        scale={[0.6, 0.6, 0.6]}
-        style={styles.instructionText}
+        text="+"
+        position={[-0.8, 0.8, -2]}
+        scale={[1, 1, 1]}
+        style={styles.zoomButton}
+        onClick={zoomIn}
       />
 
-      {/* Map container with drag, rotate, and pinch capabilities */}
+      <ViroText
+        text="−"
+        position={[0.8, 0.8, -2]}
+        scale={[1, 1, 1]}
+        style={styles.zoomButton}
+        onClick={zoomOut}
+      />
+
       <ViroNode
-        position={mapPosition.current}
-        rotation={mapRotation.current}
-        scale={mapScale.current}
+        position={position}
+        rotation={rotation}
+        scale={scale}
         dragType="FixedToWorld"
-        onDrag={handleMapDrag}
-        onRotate={handleMapRotate}
-        onPinch={handleMapPinch}
+        onDrag={(pos) => setPosition(pos)}
+        onRotate={(rot) => setRotation(clampRotation(rot))}
+        onPinch={(s) => setScale(safeScale(s))}
       >
-        {/* ============ AFRICA MAP 3D MODEL ============ */}
         <Viro3DObject
-          source={require("../../../../assets/3d/africa_3d_map.glb")}
+          source={selectedModel}
           type="GLB"
           scale={[1, 1, 1]}
           position={[0, 0, 0]}
-          rotation={[0, 0, 0]}
-          onLoadStart={handleMapLoadStart}
-          onLoadEnd={handleMapLoadEnd}
-          onError={handleMapError}
+          onLoadStart={() => console.log("Loading model...")}
+          onLoadEnd={() => setMapLoaded(true)}
+          onError={(e) => console.error("Model error:", e)}
         />
       </ViroNode>
     </ViroARScene>
   );
 };
 
-// Styles
-const styles = StyleSheet.create({
-  titleText: {
-    fontFamily: "Arial",
-    fontSize: 24,
-    color: "#ffffff",
-    textAlignVertical: "center",
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-  instructionText: {
-    fontFamily: "Arial",
-    fontSize: 16,
-    color: "#ffcc00",
-    textAlignVertical: "center",
-    textAlign: "center",
-  },
-  loadingText: {
-    fontFamily: "Arial",
-    fontSize: 18,
-    color: "#00ffff",
-    textAlignVertical: "center",
-    textAlign: "center",
-  },
-});
-
-/* ============ MAIN SCREEN COMPONENT ============ */
+/* ============ MAIN SCREEN (UNCHANGED STRUCTURE) ============ */
 export default function StudentARScreen({ route }) {
   const { arView } = route.params;
 
+  const [selectedModel, setSelectedModel] = useState(
+    require("../../../../assets/3d/africa_3d_map.glb"),
+  );
+
+  const MODELS = [
+    {
+      id: "africa",
+      label: "خريطة إفريقيا ",
+      source: require("../../../../assets/3d/africa_3d_map.glb"),
+    },
+    {
+      id: "world",
+      label: "خريطة العالم",
+      source: require("../../../../assets/3d/worldmap.glb"),
+    },
+    {
+      id: "river",
+      label: "نهر ",
+      source: require("../../../../assets/3d/waterfall_mountain_river.glb"),
+    },
+    {
+      id: "desert",
+      label: "صحراء",
+      source: require("../../../../assets/3d/mountainous_desert.glb"),
+    },
+    {
+      id: "plateau",
+      label: "هضاب",
+      source: require("../../../../assets/3d/masada_fortress__-rawscan.glb"),
+    },
+    {
+      id: "mountain",
+      label: "جبال ",
+      source: require("../../../../assets/3d/bromo_mountain_gunung_bromo.glb"),
+    },
+  ];
+
   return (
-    <ViroARSceneNavigator
-      initialScene={{ scene: ARScene }}
-      viroAppProps={{ arView }}
-      autofocus={true}
-      style={{ flex: 1 }}
-    />
+    <View style={{ flex: 1 }}>
+      <ViroARSceneNavigator
+        initialScene={{ scene: ARScene }}
+        viroAppProps={{ selectedModel, arView }}
+        autofocus={true}
+        style={{ flex: 1 }}
+      />
+
+      {/* BOTTOM HORIZONTAL MENU */}
+      <View style={styles.bottomBar}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {MODELS.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.modelButton}
+              onPress={() => {
+                console.log("Switching to:", item.label);
+                setSelectedModel(item.source);
+              }}
+            >
+              <Text style={styles.buttonText}>{item.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </View>
   );
 }
+
+/* ============ STYLES ============ */
+const styles = StyleSheet.create({
+  arText: {
+    fontSize: 18,
+    color: "white",
+    textAlign: "center",
+    backgroundColor: "rgba(0,0,0,0.6)",
+    padding: 6,
+  },
+
+  zoomButton: {
+    fontSize: 40,
+    color: "white",
+    backgroundColor: "rgba(0,0,0,0.7)",
+    padding: 10,
+    textAlign: "center",
+  },
+
+  bottomBar: {
+    position: "absolute",
+    bottom: 30,
+    width: "100%",
+    padding: 10,
+  },
+
+  modelButton: {
+    backgroundColor: "#1e90ff",
+    padding: 12,
+    marginHorizontal: 8,
+    borderRadius: 12,
+  },
+
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
