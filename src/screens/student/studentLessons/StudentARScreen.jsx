@@ -40,7 +40,6 @@ const ARScene = (props) => {
     ];
   };
 
-  // ======= NEW ZOOM FUNCTIONS (SAFE) =======
   const zoomIn = () => {
     const newScale = Math.min(1.5, scale[0] * 1.2);
     setScale([newScale, newScale, newScale]);
@@ -118,16 +117,16 @@ export default function StudentARScreen({ route }) {
       label: "خريطة إفريقيا ",
       source: require("../../../../assets/3d/africa_3d_map.glb"),
     },
-    {
-      id: "world",
-      label: "خريطة العالم",
-      source: require("../../../../assets/3d/worldmap.glb"),
-    },
-    {
-      id: "river",
-      label: "نهر ",
-      source: require("../../../../assets/3d/waterfall_mountain_river.glb"),
-    },
+    // {
+    //   id: "world",
+    //   label: "خريطة العالم",
+    //   source: require("../../../../assets/3d/worldmap.glb"),
+    // },
+    // {
+    //   id: "river",
+    //   label: "نهر ",
+    //   source: require("../../../../assets/3d/waterfall_mountain_river.glb"),
+    // },
     {
       id: "desert",
       label: "صحراء",
@@ -142,6 +141,16 @@ export default function StudentARScreen({ route }) {
       id: "mountain",
       label: "جبال ",
       source: require("../../../../assets/3d/bromo_mountain_gunung_bromo.glb"),
+    },
+    {
+      id: "clock",
+      label: "برج الساعة",
+      source: require("../../../../assets/3d/tunis_tower_clock__av._habib_bourghiba.glb"),
+    },
+    {
+      id: "coliseum",
+      label: "مدرج الجم",
+      source: require("../../../../assets/3d/coliseum_rome.glb"),
     },
   ];
 
