@@ -117,31 +117,6 @@ export default function StudentARScreen({ route }) {
       label: "خريطة إفريقيا ",
       source: require("../../../../assets/3d/africa_3d_map.glb"),
     },
-    // {
-    //   id: "world",
-    //   label: "خريطة العالم",
-    //   source: require("../../../../assets/3d/worldmap.glb"),
-    // },
-    // {
-    //   id: "river",
-    //   label: "نهر ",
-    //   source: require("../../../../assets/3d/waterfall_mountain_river.glb"),
-    // },
-    {
-      id: "desert",
-      label: "صحراء",
-      source: require("../../../../assets/3d/mountainous_desert.glb"),
-    },
-    {
-      id: "plateau",
-      label: "هضاب",
-      source: require("../../../../assets/3d/masada_fortress__-rawscan.glb"),
-    },
-    {
-      id: "mountain",
-      label: "جبال ",
-      source: require("../../../../assets/3d/bromo_mountain_gunung_bromo.glb"),
-    },
     {
       id: "clock",
       label: "برج الساعة",
@@ -151,6 +126,31 @@ export default function StudentARScreen({ route }) {
       id: "coliseum",
       label: "مدرج الجم",
       source: require("../../../../assets/3d/coliseum_rome.glb"),
+    },
+    {
+      id: "tatoui",
+      label: "تطاوين",
+      source: require("../../../../assets/3d/mos_espa_-_starwars_tunisia_film_location.glb"),
+    },
+    {
+      id: "douga",
+      label: "الموقع الأثري لدُقّة",
+      source: require("../../../../assets/3d/hierapolis_theatre_-_turkey.glb"),
+    },
+    {
+      id: "sbeitla",
+      label: "سبيطلة",
+      source: require("../../../../assets/3d/poseidon_temple_at_sounion_greece.glb"),
+    },
+    {
+      id: "zaghouan",
+      label: "زغوان",
+      source: require("../../../../assets/3d/london_roman_wall_at_tower_hill.glb"),
+    },
+    {
+      id: "carthage",
+      label: "قرطاج",
+      source: require("../../../../assets/3d/terme_del_bacucco_-_ruins_of_bacuccos_thermae.glb"),
     },
   ];
 

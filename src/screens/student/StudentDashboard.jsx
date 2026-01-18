@@ -23,7 +23,7 @@
 //   const [aiResponse, setAiResponse] = useState("");
 //   const [aiLoading, setAiLoading] = useState(false);
 
-//   const position = useRef({ x: 20, y: height - 100 }); 
+//   const position = useRef({ x: 20, y: height - 100 });
 //   const panX = useRef(new Animated.Value(20)).current;
 //   const panY = useRef(new Animated.Value(height - 100)).current;
 //   const scale = useRef(new Animated.Value(1)).current;
@@ -71,8 +71,8 @@
 //           finalX = width - buttonWidth - snapMargin;
 //         }
 
-//         const topBoundary = 50; 
-//         const bottomBoundary = height - 100; 
+//         const topBoundary = 50;
+//         const bottomBoundary = height - 100;
 
 //         if (finalY < topBoundary) {
 //           finalY = topBoundary;
@@ -574,7 +574,9 @@ import {
   View,
   Text,
   StyleSheet,
+  KeyboardAvoidingView,
   TouchableOpacity,
+  Platform,
   ScrollView,
   Dimensions,
   Modal,
@@ -708,7 +710,7 @@ const StudentDashboard = ({ navigation }) => {
           friction: 10,
         }).start();
       },
-    })
+    }),
   ).current;
 
   const cryptoId = () => {
@@ -915,6 +917,11 @@ const StudentDashboard = ({ navigation }) => {
         transparent={true}
         onRequestClose={handleCloseModal}
       >
+        <KeyboardAvoidingView
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    style={{ flex: 1 }}
+  >
+
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
@@ -977,7 +984,8 @@ const StudentDashboard = ({ navigation }) => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+          </View>
+          </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
@@ -1110,7 +1118,7 @@ const styles = StyleSheet.create({
   },
   aiButtonContainer: {
     position: "absolute",
-    top: 0,
+    top: -57,
     left: 0,
     zIndex: 1000,
   },
@@ -1140,6 +1148,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: "80%",
+    paddingBottom:29,
   },
   modalHeader: {
     backgroundColor: "#4F46E5",
@@ -1209,11 +1218,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F4F6",
   },
   inputContainer: {
-    flexDirection: "row",
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-  },
+  flexDirection: "row",
+  padding: 16,
+  borderTopWidth: 1,
+  borderTopColor: "#E5E7EB",
+  backgroundColor: "#FFF", // keeps it visible
+},
   textInput: {
     flex: 1,
     backgroundColor: "#F3F4F6",
